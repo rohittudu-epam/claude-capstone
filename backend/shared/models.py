@@ -1,11 +1,12 @@
 """Shared SQLAlchemy models for LinkNote MVP."""
 
 from datetime import datetime
+from uuid import UUID as PyUUID
 from uuid import uuid4
 
 from sqlalchemy import (
     CheckConstraint,
-    Column,
+    Computed,
     DateTime,
     Float,
     ForeignKey,
@@ -13,98 +14,83 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
-    UUID,
-    func,
 )
-from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy.dialects.postgresql import TSVECTOR
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
-Base = declarative_base()
+from shared.timeutil import utcnow
+
+SEARCH_VECTOR_SQL = (
+    "setweight(to_tsvector('english', coalesce(title, '')), 'A') || "
+    "setweight(to_tsvector('english', coalesce(body, '')), 'B')"
+)
+
+
+class Base(DeclarativeBase):
+    pass
 
 
 class User(Base):
-    """User domain entity."""
-
     __tablename__ = "users"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
-    email = Column(String(255), unique=True, nullable=False, index=True)
-    password_hash = Column(String(255), nullable=False)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-    notes = relationship("Note", back_populates="owner", cascade="all, delete-orphan")
-    tags = relationship("Tag", back_populates="owner", cascade="all, delete-orphan")
-    revoked_tokens = relationship("RevokedToken", back_populates="user", cascade="all, delete-orphan")
+    id: Mapped[PyUUID] = mapped_column(primary_key=True, default=uuid4)
+    email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
+    password_hash: Mapped[str] = mapped_column(String(255))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, onupdate=utcnow)
 
 
 class Note(Base):
-    """Note domain entity."""
-
     __tablename__ = "notes"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
-    owner_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
-    title = Column(String(500), nullable=False, index=True)
-    body = Column(Text, nullable=False)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    id: Mapped[PyUUID] = mapped_column(primary_key=True, default=uuid4)
+    owner_id: Mapped[PyUUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    title: Mapped[str] = mapped_column(String(500))
+    body: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, onupdate=utcnow)
+    search_vector: Mapped[str | None] = mapped_column(
+        TSVECTOR, Computed(SEARCH_VECTOR_SQL, persisted=True), deferred=True
+    )
 
-    owner = relationship("User", back_populates="notes")
-    tags = relationship("Tag", secondary="note_tags", back_populates="notes")
-    note_tags = relationship("NoteTag", back_populates="note", cascade="all, delete-orphan")
-    outbox_entries = relationship("OutboxEntry", back_populates="note", cascade="all, delete-orphan")
+    tags: Mapped[list[Tag]] = relationship(secondary="note_tags", back_populates="notes", order_by="Tag.name")
 
     __table_args__ = (
         Index("ix_notes_owner_id_updated_at", "owner_id", "updated_at"),
-        Index(
-            "ix_notes_body_gin",
-            func.to_tsvector("english", body),
-            postgresql_using="gin",
-        ),
+        Index("ix_notes_search_vector", "search_vector", postgresql_using="gin"),
     )
 
 
 class Tag(Base):
-    """Tag domain entity."""
-
     __tablename__ = "tags"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
-    owner_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
-    name = Column(String(100), nullable=False)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    id: Mapped[PyUUID] = mapped_column(primary_key=True, default=uuid4)
+    owner_id: Mapped[PyUUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    name: Mapped[str] = mapped_column(String(100))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
 
-    owner = relationship("User", back_populates="tags")
-    notes = relationship("Note", secondary="note_tags", back_populates="tags")
+    notes: Mapped[list[Note]] = relationship(secondary="note_tags", back_populates="tags")
 
     __table_args__ = (UniqueConstraint("owner_id", "name", name="uq_tags_owner_id_name"),)
 
 
 class NoteTag(Base):
-    """Association between notes and tags."""
-
     __tablename__ = "note_tags"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
-    note_id = Column(UUID(as_uuid=True), ForeignKey("notes.id", ondelete="CASCADE"), nullable=False, index=True)
-    tag_id = Column(UUID(as_uuid=True), ForeignKey("tags.id", ondelete="CASCADE"), nullable=False, index=True)
-
-    note = relationship("Note", back_populates="note_tags")
-    tag = relationship("Tag")
-
-    __table_args__ = (UniqueConstraint("note_id", "tag_id", name="uq_note_tags_note_id_tag_id"),)
+    note_id: Mapped[PyUUID] = mapped_column(ForeignKey("notes.id", ondelete="CASCADE"), primary_key=True)
+    tag_id: Mapped[PyUUID] = mapped_column(ForeignKey("tags.id", ondelete="CASCADE"), primary_key=True, index=True)
 
 
 class AcceptedLink(Base):
-    """Accepted bidirectional link between notes."""
+    """Accepted link; stored once per pair with source_note_id < target_note_id."""
 
     __tablename__ = "accepted_links"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
-    source_note_id = Column(UUID(as_uuid=True), ForeignKey("notes.id", ondelete="CASCADE"), nullable=False, index=True)
-    target_note_id = Column(UUID(as_uuid=True), ForeignKey("notes.id", ondelete="CASCADE"), nullable=False, index=True)
-    owner_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    id: Mapped[PyUUID] = mapped_column(primary_key=True, default=uuid4)
+    source_note_id: Mapped[PyUUID] = mapped_column(ForeignKey("notes.id", ondelete="CASCADE"), index=True)
+    target_note_id: Mapped[PyUUID] = mapped_column(ForeignKey("notes.id", ondelete="CASCADE"), index=True)
+    owner_id: Mapped[PyUUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
 
     __table_args__ = (
         UniqueConstraint("source_note_id", "target_note_id", name="uq_accepted_links_pair"),
@@ -113,17 +99,15 @@ class AcceptedLink(Base):
 
 
 class Suggestion(Base):
-    """Pending link suggestion for user review."""
-
     __tablename__ = "suggestions"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
-    source_note_id = Column(UUID(as_uuid=True), ForeignKey("notes.id", ondelete="CASCADE"), nullable=False, index=True)
-    target_note_id = Column(UUID(as_uuid=True), ForeignKey("notes.id", ondelete="CASCADE"), nullable=False, index=True)
-    owner_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
-    similarity_score = Column(Float, nullable=False)
-    explanation = Column(Text, nullable=False)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    id: Mapped[PyUUID] = mapped_column(primary_key=True, default=uuid4)
+    source_note_id: Mapped[PyUUID] = mapped_column(ForeignKey("notes.id", ondelete="CASCADE"), index=True)
+    target_note_id: Mapped[PyUUID] = mapped_column(ForeignKey("notes.id", ondelete="CASCADE"), index=True)
+    owner_id: Mapped[PyUUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    similarity_score: Mapped[float] = mapped_column(Float)
+    explanation: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
 
     __table_args__ = (
         UniqueConstraint("source_note_id", "target_note_id", name="uq_suggestions_pair"),
@@ -132,35 +116,28 @@ class Suggestion(Base):
 
 
 class OutboxEntry(Base):
-    """Transactional Outbox for reliable event publishing."""
+    """Transactional outbox. note_id is intentionally not a foreign key so
+    'deleted' events survive the deletion of the note they describe."""
 
     __tablename__ = "outbox"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
-    note_id = Column(UUID(as_uuid=True), ForeignKey("notes.id", ondelete="CASCADE"), nullable=False)
-    owner_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
-    event_type = Column(String(50), nullable=False)
-    payload = Column(Text, nullable=False)
-    schema_version = Column(String(10), nullable=False, default="1")
-    published_at = Column(DateTime, nullable=True)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-
-    note = relationship("Note", back_populates="outbox_entries")
+    id: Mapped[PyUUID] = mapped_column(primary_key=True, default=uuid4)
+    note_id: Mapped[PyUUID] = mapped_column(index=True)
+    owner_id: Mapped[PyUUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    event_type: Mapped[str] = mapped_column(String(50))
+    payload: Mapped[str] = mapped_column(Text)
+    schema_version: Mapped[str] = mapped_column(String(10), default="1")
+    published_at: Mapped[datetime | None] = mapped_column(DateTime)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
 
     __table_args__ = (Index("ix_outbox_published_at_created_at", "published_at", "created_at"),)
 
 
 class RevokedToken(Base):
-    """Revoked JWT tokens."""
-
     __tablename__ = "revoked_tokens"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
-    token_jti = Column(String(255), nullable=False, unique=True, index=True)
-    revoked_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-    expires_at = Column(DateTime, nullable=False)
-
-    user = relationship("User", back_populates="revoked_tokens")
-
-    __table_args__ = (Index("ix_revoked_tokens_expires_at", "expires_at"),)
+    id: Mapped[PyUUID] = mapped_column(primary_key=True, default=uuid4)
+    user_id: Mapped[PyUUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    token_jti: Mapped[str] = mapped_column(String(255), unique=True, index=True)
+    revoked_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    expires_at: Mapped[datetime] = mapped_column(DateTime, index=True)
