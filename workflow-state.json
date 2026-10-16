@@ -45,23 +45,23 @@
       "artifacts": [
         "docker-compose.yml",
         ".env.example",
-        ".gitignore",
         ".github/workflows/ci.yml",
-        "backend/shared/models.py",
-        "backend/alembic/",
-        "backend/requirements.txt",
         "backend/Dockerfile",
+        "backend/alembic.ini",
+        "backend/migrations/",
+        "backend/shared/",
         "backend/auth-service/",
         "backend/note-service/",
         "backend/link-service/",
         "backend/graph-service/",
         "frontend/Dockerfile",
-        "frontend/package.json"
+        "frontend/package.json",
+        "docs/implementation-notes.md"
       ],
       "started_at": "2026-10-17T00:00:00Z",
       "completed_at": null,
       "retries": 0,
-      "notes": "User approved phased implementation (Phase 1 only first). Phase 1 (IMPL-1 to IMPL-4) written on branch feature/phase-1-foundation; static checks only (compose config valid, Python syntax OK). Not yet verified: alembic upgrade against real Postgres, docker image builds. Frontend is a package.json stub until IMPL-18. Service build contexts do not yet include backend/shared. Phases 2-4 (IMPL-5 to IMPL-28) pending; awaiting user review before Phase 2."
+      "notes": "Phase 1 (IMPL-1 to IMPL-4) on feature/phase-1-foundation. Phase 2 (IMPL-5 to IMPL-12) on feature/phase-2-backend-services, branched from Phase 1 (neither merged to main). Phase 2 verification: 124 backend tests pass against real PostgreSQL (PGlite) with fakeredis; ruff and mypy clean; compose config valid. NOT verified: Docker image builds / full compose stack (no daemon), real Redis, Traefik routing and rate limiting. Deviations from plan are listed in docs/implementation-notes.md. Phases 3-4 (IMPL-13 to IMPL-28) pending; awaiting user review before Phase 3."
     },
     "review": {
       "status": "PENDING",
@@ -97,6 +97,6 @@
   "branching": {
     "strategy": "GitHub Flow (see docs/branching-strategy.md)",
     "default_branch": "main",
-    "active_branch": "feature/phase-1-foundation"
+    "active_branch": "feature/phase-2-backend-services"
   }
 }
