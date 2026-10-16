@@ -1,0 +1,228 @@
+x-backend-env: &backend-env
+  ENVIRONMENT: ${ENVIRONMENT:-development}
+  LOG_LEVEL: ${LOG_LEVEL:-INFO}
+  DATABASE_URL: postgresql://${POSTGRES_USER:-linknote}:${POSTGRES_PASSWORD:-linknote_password}@postgres:5432/${POSTGRES_DB:-linknote}
+  REDIS_URL: redis://redis:6379
+  JWT_SECRET_KEY: ${JWT_SECRET_KEY:?JWT_SECRET_KEY must be set (copy .env.example to .env)}
+  JWT_ALGORITHM: HS256
+  ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-15}
+  REFRESH_TOKEN_EXPIRE_DAYS: ${REFRESH_TOKEN_EXPIRE_DAYS:-7}
+  COOKIE_SECURE: ${COOKIE_SECURE:-true}
+
+x-backend-deps: &backend-deps
+  migrate:
+    condition: service_completed_successfully
+  redis:
+    condition: service_healthy
+
+x-backend-health: &backend-health
+  test: ["CMD", "curl", "-fsS", "http://localhost:8000/health"]
+  interval: 10s
+  timeout: 5s
+  retries: 5
+  start_period: 10s
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: linknote-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-linknote}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-linknote_password}
+      POSTGRES_DB: ${POSTGRES_DB:-linknote}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-linknote} -d ${POSTGRES_DB:-linknote}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend
+
+  redis:
+    image: redis:7-alpine
+    container_name: linknote-redis
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend
+
+  traefik:
+    image: traefik:v3.6
+    container_name: linknote-traefik
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - frontend
+      - backend
+
+  migrate:
+    build:
+      context: ./backend
+      args:
+        SERVICE: auth-service
+    container_name: linknote-migrate
+    command: ["alembic", "upgrade", "head"]
+    environment:
+      <<: *backend-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+    networks:
+      - backend
+
+  auth-service:
+    build:
+      context: ./backend
+      args:
+        SERVICE: auth-service
+    container_name: linknote-auth-service
+    environment:
+      <<: *backend-env
+    depends_on: *backend-deps
+    healthcheck: *backend-health
+    networks:
+      - backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.auth.rule=PathPrefix(`/api/auth`)"
+      - "traefik.http.routers.auth.middlewares=auth-ratelimit"
+      - "traefik.http.services.auth.loadbalancer.server.port=8000"
+      # Brute-force protection for login/refresh/verify (FR-3): per client IP.
+      - "traefik.http.middlewares.auth-ratelimit.ratelimit.average=30"
+      - "traefik.http.middlewares.auth-ratelimit.ratelimit.period=1m"
+      - "traefik.http.middlewares.auth-ratelimit.ratelimit.burst=10"
+
+  note-service:
+    build:
+      context: ./backend
+      args:
+        SERVICE: note-service
+    container_name: linknote-note-service
+    environment:
+      <<: *backend-env
+    depends_on: *backend-deps
+    healthcheck: *backend-health
+    networks:
+      - backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.note.rule=PathPrefix(`/api/notes`) || PathPrefix(`/api/tags`)"
+      - "traefik.http.services.note.loadbalancer.server.port=8000"
+
+  outbox-publisher:
+    build:
+      context: ./backend
+      args:
+        SERVICE: note-service
+    container_name: linknote-outbox-publisher
+    command: ["python", "-m", "note_service.publisher"]
+    environment:
+      <<: *backend-env
+    depends_on: *backend-deps
+    restart: unless-stopped
+    networks:
+      - backend
+
+  link-service:
+    build:
+      context: ./backend
+      args:
+        SERVICE: link-service
+    container_name: linknote-link-service
+    environment:
+      <<: *backend-env
+    depends_on: *backend-deps
+    healthcheck: *backend-health
+    networks:
+      - backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.link.rule=PathPrefix(`/api/suggestions`)"
+      - "traefik.http.services.link.loadbalancer.server.port=8000"
+
+  link-worker:
+    build:
+      context: ./backend
+      args:
+        SERVICE: link-service
+    container_name: linknote-link-worker
+    command: ["python", "-m", "link_service.worker"]
+    environment:
+      <<: *backend-env
+    depends_on: *backend-deps
+    restart: unless-stopped
+    networks:
+      - backend
+
+  graph-service:
+    build:
+      context: ./backend
+      args:
+        SERVICE: graph-service
+    container_name: linknote-graph-service
+    environment:
+      <<: *backend-env
+    depends_on: *backend-deps
+    healthcheck: *backend-health
+    networks:
+      - backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.graph.rule=PathPrefix(`/api/graph`)"
+      - "traefik.http.services.graph.loadbalancer.server.port=8000"
+
+  # The frontend is scaffolded in IMPL-18. Until then it is opt-in: `docker compose --profile frontend up`.
+  frontend:
+    profiles: ["frontend"]
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: linknote-frontend
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://localhost
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      - traefik
+    networks:
+      - frontend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
+      - "traefik.http.services.frontend.loadbalancer.server.port=3000"
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge

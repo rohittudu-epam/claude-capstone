@@ -1,0 +1,15 @@
+line-length = 120
+target-version = "py314"
+extend-exclude = ["migrations/versions"]
+
+[lint]
+select = ["E", "F", "I", "B", "UP"]
+
+[lint.isort]
+known-first-party = ["shared", "auth_service", "note_service", "link_service", "graph_service"]
+
+[lint.per-file-ignores]
+"**/tests/**" = ["E501"]
+
+[lint.flake8-bugbear]
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Query"]
