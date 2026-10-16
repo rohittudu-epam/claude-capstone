@@ -105,24 +105,25 @@ LinkNote MVP is a containerized, microservices-based personal knowledge manageme
 
 ### Component: Auth Service (FastAPI)
 
-- **Responsibility:** Handle user registration, login, JWT token issuance and validation, refresh token rotation, and session management. Ensure all operations enforce email uniqueness, password hashing, and token security policies.
+- **Responsibility:** Handle user registration, login, JWT token issuance and validation, refresh token rotation, session management, and token revocation. Ensure all operations enforce email uniqueness, password hashing, and token security policies.
 - **Technology:** FastAPI (Python), SQLAlchemy 2.0 ORM, bcrypt for password hashing, PyJWT for token management.
 - **Interfaces:**
   - REST API endpoints:
     - `POST /register` — user registration (email, password).
     - `POST /login` — login (email, password) → access token + refresh token.
     - `POST /refresh` — refresh token rotation.
-    - `POST /logout` — token revocation.
-    - `GET /verify` — token validation (used by other services).
-  - Writes to PostgreSQL `users` table (user registration, password updates).
-  - Reads from PostgreSQL `users` table (login verification).
+    - `POST /logout` — token revocation (adds token to revocation list).
+    - `GET /verify?token=<token>` — token validation and revocation status check (Design Review Remediation DR-2). Used by other services to validate token and confirm it has not been revoked.
+  - Writes to PostgreSQL: `users` table (user registration, password updates), `revoked_tokens` table (logout and revocation records).
+  - Reads from PostgreSQL: `users` and `revoked_tokens` tables.
 - **Dependencies:** PostgreSQL, JWT signing key (from environment).
-- **Security:** Bcrypt password hashing (12 rounds), short-lived access tokens (15 minutes), refresh token rotation, HttpOnly cookie storage enforced by frontend.
+- **Security:** Bcrypt password hashing (12 rounds), short-lived access tokens (15 minutes), refresh token rotation, HttpOnly cookie storage enforced by frontend. Token revocation list (SQL table or Redis cache) enables eventual-consistency revocation across services.
+- **Token Revocation (Design Review Remediation DR-2):** On logout, the refresh token is added to a revocation list. Other services can query `/verify?token=<token>` to check revocation status. This prevents indefinite use of stolen refresh tokens while maintaining eventual consistency.
 - **Error Handling:** Invalid credentials return generic "authentication failed" errors. Invalid tokens return 401 Unauthorized. Rate limiting prevents brute-force attacks.
 
 ### Component: Note Service (FastAPI)
 
-- **Responsibility:** Provide CRUD operations for notes and tags scoped to the authenticated user. Enforce note ownership, validate Markdown content, manage note-tag associations, and publish domain events for downstream link analysis.
+- **Responsibility:** Provide CRUD operations for notes and tags scoped to the authenticated user. Enforce note ownership, validate Markdown content, manage note-tag associations, durably persist domain events for downstream link analysis, and support cascading deletion.
 - **Technology:** FastAPI (Python), SQLAlchemy 2.0 ORM, Pydantic v2 for request validation.
 - **Interfaces:**
   - REST API endpoints:
@@ -130,13 +131,14 @@ LinkNote MVP is a containerized, microservices-based personal knowledge manageme
     - `GET /notes` — list user's notes (with pagination).
     - `GET /notes/{id}` — retrieve single note.
     - `PUT /notes/{id}` — update note (title, body, tags).
-    - `DELETE /notes/{id}` — delete note.
+    - `DELETE /notes/{id}` — delete note (cascades tags, links, suggestions).
     - `GET /notes/search` — full-text search (query, tags filter).
-  - Publishes to Redis Streams: `note.created` and `note.updated` events (note ID, owner ID, event type, timestamp).
-  - Reads from PostgreSQL: `notes`, `tags`, `note_tags` tables.
-  - Writes to PostgreSQL: create, update, delete note records; tag associations; timestamps.
-- **Dependencies:** PostgreSQL, Redis (for event publishing), Auth Service (for token validation).
-- **Data Integrity:** Notes scoped to owner; tag normalization (lowercase, trimmed); uniqueness constraints on note-tag pairs; cascading deletes for associated tags and links.
+  - **Outbox Pattern (Design Review Remediation DR-1):** On note creation or update, inserts an event into the `outbox` table in the same transaction as the note persistence. A separate outbox publisher (background task or worker) asynchronously reads unpublished outbox entries and publishes to Redis Streams. This ensures no events are lost if Redis is temporarily unavailable.
+  - Reads from PostgreSQL: `notes`, `tags`, `note_tags`, `outbox` tables.
+  - Writes to PostgreSQL: create, update, delete note records; tag associations; outbox entries; timestamps.
+- **Dependencies:** PostgreSQL (including outbox table), Outbox Publisher (background process), Auth Service (for token validation).
+- **Data Integrity:** Notes scoped to owner; tag normalization (lowercase, trimmed); uniqueness constraints on note-tag pairs; cascading deletes using PostgreSQL ON DELETE CASCADE (FR-5, FR-6, FR-8).
+- **Event Durability:** Events are stored durably in the outbox table before attempting publication to Redis. Guarantees compliance with FR-8 acceptance criteria: "A Redis outage or publication failure is observable and does not silently lose an event."
 - **Error Handling:** 401 for unauthenticated requests, 403 for unauthorized access to other users' notes, 400 for invalid input, 404 for not found, 500 for server errors.
 
 ### Component: Link Service (FastAPI)
@@ -164,40 +166,61 @@ LinkNote MVP is a containerized, microservices-based personal knowledge manageme
 
 ### Component: Graph Service (FastAPI)
 
-- **Responsibility:** Provide a read-only aggregation API returning nodes (notes) and edges (accepted links) scoped to the authenticated user, with tag-based filtering.
+- **Responsibility:** Provide a read-only aggregation API returning nodes (notes) and edges (accepted links) scoped to the authenticated user, with tag-based filtering and explicit result capping.
 - **Technology:** FastAPI (Python), SQLAlchemy 2.0 ORM for queries.
 - **Interfaces:**
   - REST API endpoint:
     - `GET /graph` — retrieve graph (optional query params: tags filter, limit).
   - Reads from PostgreSQL: `notes`, `tags`, `note_tags`, `accepted_links` tables.
-  - Response format: `{ nodes: [{id, title, created_at, updated_at, tags}], edges: [{source_id, target_id}] }`.
+  - Response format (Design Review Remediation DR-4): 
+    ```json
+    {
+      "nodes": [{id, title, created_at, updated_at, tags}],
+      "edges": [{source_id, target_id}],
+      "is_capped": false,
+      "total_nodes": 147,
+      "message": null
+    }
+    ```
+    When capped:
+    ```json
+    {
+      "is_capped": true,
+      "total_nodes": 1547,
+      "message": "Graph limited to 500 visible nodes. Consider adding more tag filters to narrow results."
+    }
+    ```
 - **Dependencies:** PostgreSQL, Auth Service (for token validation).
 - **Graph Filtering:**
   - Tags filter uses AND logic: return only notes containing ALL selected tags.
   - Edges included only if both source and target nodes are visible after filtering.
-  - Cap result at 500 visible nodes; return indicator if limit reached.
+  - Cap result at 500 visible nodes; return `is_capped: true` and `total_nodes` in response (FR-14).
 - **Error Handling:** 401 for unauthenticated, 400 for invalid filters, 200 with capped results for large graphs.
 
 ### Component: PostgreSQL Database (Shared)
 
-- **Responsibility:** Persist all domain entities (users, notes, tags, links, suggestions) with ACID guarantees, enforce referential integrity, and support efficient full-text search and graph queries.
+- **Responsibility:** Persist all domain entities (users, notes, tags, links, suggestions, outbox, revoked tokens) with ACID guarantees, enforce referential integrity via cascading deletes, and support efficient full-text search and graph queries.
 - **Technology:** PostgreSQL 13+, with service-specific schemas (proposed: `auth`, `notes`, `links` to maintain logical isolation).
 - **Schema:**
   - `auth.users`: id (UUID), email (unique), password_hash, created_at, updated_at.
+  - `auth.revoked_tokens`: id (UUID), token_value, user_id (FK), revoked_at (Design Review Remediation DR-2).
   - `notes.notes`: id (UUID), owner_id (FK to users), title, body, created_at, updated_at.
   - `notes.tags`: id (UUID), owner_id (FK to users), name (normalized), created_at.
   - `notes.note_tags`: note_id (FK), tag_id (FK), owner_id (FK to users) — unique (note_id, tag_id).
-  - `links.accepted_links`: id (UUID), source_note_id (FK), target_note_id (FK), owner_id (FK), created_at — unique (source, target) canonicalized.
-  - `links.suggestions`: id (UUID), source_note_id (FK), target_note_id (FK), owner_id (FK), score, status (pending/accepted/rejected), created_at, updated_at.
+  - `notes.outbox`: id (UUID), note_id (FK), owner_id (FK), event_type (created/updated), payload (JSON), created_at, published_at (Design Review Remediation DR-1).
+  - `links.accepted_links`: id (UUID), source_note_id (FK), target_note_id (FK), owner_id (FK), created_at — unique (source, target) canonicalized. Foreign key uses ON DELETE CASCADE.
+  - `links.suggestions`: id (UUID), source_note_id (FK), target_note_id (FK), owner_id (FK), score, status (pending/accepted/rejected), created_at, updated_at. Foreign key uses ON DELETE CASCADE.
 - **Indexes:**
   - Full-text search index on `notes.body` (tsvector).
   - Indexes on (owner_id, created_at) for efficient per-user queries.
   - Indexes on foreign keys for join performance.
+  - Index on `outbox.published_at` for identifying unpublished events.
 - **Constraints:**
-  - Foreign keys enforce referential integrity.
+  - Foreign keys enforce referential integrity with ON DELETE CASCADE for dependent entities (Design Review Remediation DR-3).
   - Check constraints ensure non-null owners for multi-tenant isolation.
   - Unique constraints prevent duplicate tags per user, duplicate links per pair.
-- **Transactions:** Multi-row updates use explicit transactions to maintain consistency (e.g., deleting a note and cascading links).
+- **Transactions:** Multi-row updates use explicit transactions to maintain consistency (e.g., deleting a note and cascading links, note creation with outbox entry insertion).
+- **Cascading Delete Behavior (Design Review Remediation DR-3):** When a note is deleted, PostgreSQL automatically deletes associated tags, note-tag associations, accepted links, pending suggestions, and outbox entries via ON DELETE CASCADE constraints. This ensures referential integrity and prevents orphaned records.
 - **Dependencies:** Alembic migrations (defined in each service).
 
 ### Component: Redis Streams (Event Bus)
@@ -205,12 +228,29 @@ LinkNote MVP is a containerized, microservices-based personal knowledge manageme
 - **Responsibility:** Provide reliable, ordered message passing from Note Service (event source) to Link Service (event consumer) using Redis Streams consumer groups, enabling asynchronous link analysis without blocking note CRUD.
 - **Technology:** Redis 5.0+ with Streams, consumer groups for at-least-once delivery semantics.
 - **Streams:**
-  - `note_events`: entries with payload `{ event_type: "created" | "updated", note_id, owner_id, version, timestamp }`.
+  - `note_events`: entries with payload `{ schema_version: 1, event_type: "created" | "updated", note_id, owner_id, timestamp }` (Design Review Remediation DR-5: versioned events for future schema evolution).
 - **Consumer Group:** `link-service` consumes from `note_events` with automatic offset tracking.
-- **Guarantees:** At-least-once delivery; consumers must be idempotent to handle duplicates (same event delivered multiple times if processing fails).
+- **Guarantees:** At-least-once delivery; consumers must be idempotent to handle duplicates (same event delivered multiple times if processing fails or during outbox publisher retry).
 - **Retention:** Automatic trimming to recent entries (configurable, proposed: last 1000 entries or 7 days).
-- **Error Handling:** Consumer tracks processing failures; failed events remain in stream for retry. Alerts/logs trigger on persistent failures.
-- **Dependencies:** Note Service (publishes), Link Service (consumes).
+- **Error Handling:** Consumer tracks processing failures; failed events remain in stream for retry. Alerts/logs trigger on persistent failures. Outbox publisher retry may cause duplicate publication; Link Service consumers handle via idempotent upsert (no duplicate suggestions).
+- **Dependencies:** Outbox Publisher (publishes from outbox table), Link Service (consumes and processes).
+
+### Component: Outbox Publisher (Background Process)
+
+- **Responsibility:** Continuously read unpublished events from the Note Service outbox table and publish them to Redis Streams, ensuring no events are lost if Redis is temporarily unavailable.
+- **Technology:** FastAPI/Celery background task or standalone Python worker.
+- **Interfaces:**
+  - Reads from PostgreSQL: `notes.outbox` table (unpublished entries where `published_at` is NULL).
+  - Publishes to Redis Streams: `note_events` stream.
+  - Updates PostgreSQL: sets `published_at` timestamp after successful publication.
+- **Processing:**
+  - Polls outbox table at configurable interval (proposed: every 100ms or batch size of 100 entries).
+  - Publishes events to Redis Streams in order (maintains event ordering).
+  - Marks events as published after confirmation.
+  - On Redis failure, retries with exponential backoff; does not mark as published until confirmed.
+- **Resilience:** Automatic restart on crash; maintains ordering; ensures no events are lost.
+- **Dependencies:** PostgreSQL (outbox table), Redis Streams.
+- **Design Review Remediation DR-1:** This component implements the Transactional Outbox Pattern, ensuring durability of events and compliance with FR-8.
 
 ### Component: CI/CD Pipeline
 
@@ -432,8 +472,28 @@ LinkNote MVP is a containerized, microservices-based personal knowledge manageme
 | **Component Isolation** | ✓ | Each service owns its domain; REST APIs define clear boundaries. |
 | **Scalability** | ✓ | Stateless services, horizontal scaling via replicas; database and Redis are shared bottlenecks. |
 | **Maintainability** | ✓ | Clear component responsibilities, documented interfaces, consistent technology choices. |
-| **Security** | ✓ | JWT-based auth, encrypted passwords, server-side authorization, secrets in env vars. |
-| **Resilience** | ⚠ | Single Redis and PostgreSQL instances (no HA); error handling and retry policies documented. |
+| **Security** | ✓ | JWT-based auth, encrypted passwords, server-side authorization, secrets in env vars, token revocation. |
+| **Resilience** | ✓ | Outbox pattern ensures no event loss; token revocation prevents stolen token reuse. Transactional cascade deletes ensure consistency. |
 | **Observability** | ✓ | Structured logging, correlation IDs, health endpoints, documented error scenarios. |
+
+---
+
+## Revision History
+
+### Revision 1 (Design Review – 2026-10-16)
+
+**Changes incorporating Design Review findings (see `design-review.md` for full details):**
+
+1. **DR-1: Event Publishing Durability** — Added Outbox Publisher component and `notes.outbox` table. Note Service now stores events durably in the outbox as part of the same transaction that persists the note. Outbox Publisher asynchronously publishes to Redis Streams, ensuring no events are lost if Redis is temporarily unavailable. Satisfies FR-8 acceptance criteria.
+
+2. **DR-2: Token Revocation** — Added `auth.revoked_tokens` table and `/api/auth/verify?token=<token>` endpoint to Auth Service. Other services can check revocation status for sensitive operations. Prevents indefinite use of stolen refresh tokens.
+
+3. **DR-3: Cascading Deletes** — Documented ON DELETE CASCADE constraints on foreign keys in `accepted_links` and `suggestions` tables. When a note is deleted, all dependent records are automatically deleted via transactional cascade, ensuring referential integrity.
+
+4. **DR-4: Graph Capping Feedback** — Updated Graph Service response format to include `is_capped`, `total_nodes`, and `message` fields, providing explicit feedback when results are truncated at 500 nodes.
+
+5. **DR-5: Event Schema Versioning** — Added `schema_version: 1` field to event payloads in Redis Streams. Documents versioning approach for future schema evolution without breaking consumers.
+
+All findings were **Approved** with remediations. No changes to requirements were necessary; design improvements address identified gaps.
 
 ---
