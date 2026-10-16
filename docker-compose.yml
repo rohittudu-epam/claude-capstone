@@ -59,7 +59,7 @@ services:
       - backend
 
   traefik:
-    image: traefik:v2.10
+    image: traefik:v3.6
     container_name: linknote-traefik
     command:
       - "--api.insecure=true"

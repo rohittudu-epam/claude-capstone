@@ -46,6 +46,7 @@ Event contract (`note_events` stream, schema version 1): `event_id`, `schema_ver
 | Schema changes (migration 002) | n/a | Title-weighted generated `search_vector` with GIN index; `outbox.note_id` no longer a foreign key; `note_tags` keyed by `(note_id, tag_id)`; redundant indexes and constraints from 001 removed; missing `suggestions.target_note_id` index added | A FK would cascade-delete a "deleted" event together with its note. The old body-only index could not rank titles above bodies. The rest fixes drift found by the model-vs-migration test. |
 | Rate limiting | Traefik | Traefik middleware on `/api/auth` (30 requests/min/IP, burst 10) | As planned; configuration only, not testable offline. |
 | Traefik routes | `/api/note`, `/api/link` | `/api/notes` + `/api/tags`, `/api/suggestions` | Match the real endpoint paths. |
+| Traefik version | v2.10 | v3.6 | v2.10's bundled Docker client is rejected by Docker Engine 29, so it discovered no containers and every route returned 404. Pinning `DOCKER_API_VERSION` did not help. The labels and flags used here are unchanged in v3. |
 | Docker build | Per-service contexts | One parameterized Dockerfile, context `backend/` | Per-service contexts could not import `shared`. |
 | Published ports | Every service published | Only Traefik (80/443), plus Postgres/Redis/dashboard on 127.0.0.1 | Backend services must not be reachable around the proxy. |
 | Frontend in Compose | Always started | Behind the `frontend` profile until IMPL-18 | There is no frontend to build yet. |
@@ -67,12 +68,19 @@ Tests need a real PostgreSQL and **wipe it**. They use `TEST_DATABASE_URL` (the 
 
 Redis is faked with `fakeredis`. Lint and types: `ruff check . && ruff format --check .` and the `mypy` command in `.github/workflows/ci.yml`.
 
+## Verified on the real stack
+
+Checked 2026-10-17 on Docker Desktop (Engine 29.8.1) with `docker compose build && docker compose up -d`:
+
+- All seven images build; every service reports healthy; `migrate` exits cleanly.
+- Through Traefik on port 80: register (201), login (200, two HttpOnly cookies), wrong password (generic 401), unauthenticated request (401), create, search, tag filter, update, delete, and logout followed by a rejected request (401).
+- Real Redis: three events (created, updated, deleted) reached `note_events` and were consumed by the `link-service` group with nothing pending.
+- Rate limiting: 60 rapid logins gave 20 x 401 and 40 x 429.
+
 ## Not yet verified
 
-- The Docker images and the full Compose stack have not been built or run (no Docker daemon was available). The service start commands were checked against a simulated image layout only.
-- Redis behaviour is tested against `fakeredis`, not a real Redis server.
+- Redis failure modes (outage during publish, consumer reconnect) are tested against `fakeredis` and a failing stub, not by stopping a real Redis.
 - The two `IntegrityError` to rollback branches in auth (concurrent duplicate registration, concurrent refresh-token reuse) are not exercised: the local test database cannot survive a SQL error. The pre-checks in front of them are tested.
-- Traefik rate limiting and routing are untested.
 - Search performance: p95 about 50 ms over 10,000 notes on PGlite (target 500 ms). Re-measure on real PostgreSQL.
 
 ## Known gaps

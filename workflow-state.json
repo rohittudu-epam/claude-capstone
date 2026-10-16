@@ -61,7 +61,7 @@
       "started_at": "2026-10-17T00:00:00Z",
       "completed_at": null,
       "retries": 0,
-      "notes": "Phase 1 (IMPL-1 to IMPL-4) on feature/phase-1-foundation. Phase 2 (IMPL-5 to IMPL-12) on feature/phase-2-backend-services, branched from Phase 1 (neither merged to main). Phase 2 verification: 124 backend tests pass against real PostgreSQL (PGlite) with fakeredis; ruff and mypy clean; compose config valid. NOT verified: Docker image builds / full compose stack (no daemon), real Redis, Traefik routing and rate limiting. Deviations from plan are listed in docs/implementation-notes.md. Phases 3-4 (IMPL-13 to IMPL-28) pending; awaiting user review before Phase 3."
+      "notes": "Phase 1 (IMPL-1 to IMPL-4) on feature/phase-1-foundation. Phase 2 (IMPL-5 to IMPL-12) on feature/phase-2-backend-services, branched from Phase 1 (neither merged to main). Phase 2 verification: 124 backend tests pass against real PostgreSQL (PGlite) with fakeredis; ruff and mypy clean; compose config valid. Also verified on the real Docker stack (images build, services healthy, end-to-end flow through Traefik, real Redis events, auth rate limiting); this required upgrading Traefik v2.10 to v3.6 for Docker Engine 29. Still unverified: Redis outage behaviour against a real server, concurrent-race IntegrityError branches. Deviations from plan are listed in docs/implementation-notes.md. Phases 3-4 (IMPL-13 to IMPL-28) pending; awaiting user review before Phase 3."
     },
     "review": {
       "status": "PENDING",
