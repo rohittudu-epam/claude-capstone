@@ -10,6 +10,7 @@ from note_service.schemas import NoteCreate, NoteUpdate
 from shared.events import NoteEventType
 from shared.models import Note, NoteTag, Tag
 from shared.outbox import add_note_event
+from shared.tags import note_ids_with_all_tags
 from shared.timeutil import utcnow
 
 
@@ -86,21 +87,10 @@ def delete_note(db: Session, owner_id: UUID, note_id: UUID) -> None:
     db.commit()
 
 
-def _with_all_tags(owner_id: UUID, tag_names: list[str]):
-    """Subquery of note ids carrying every one of `tag_names` (AND semantics)."""
-    return (
-        select(NoteTag.note_id)
-        .join(Tag, Tag.id == NoteTag.tag_id)
-        .where(Tag.owner_id == owner_id, Tag.name.in_(tag_names))
-        .group_by(NoteTag.note_id)
-        .having(func.count(Tag.id.distinct()) == len(tag_names))
-    )
-
-
 def list_notes(db: Session, owner_id: UUID, *, tag_names: list[str], limit: int, offset: int) -> tuple[list[Note], int]:
     base = select(Note).where(Note.owner_id == owner_id)
     if tag_names:
-        base = base.where(Note.id.in_(_with_all_tags(owner_id, tag_names)))
+        base = base.where(Note.id.in_(note_ids_with_all_tags(owner_id, tag_names)))
     total = db.scalar(select(func.count()).select_from(base.subquery())) or 0
     notes = db.scalars(
         base.order_by(Note.updated_at.desc(), Note.id).limit(limit).offset(offset).options(selectinload(Note.tags))
@@ -115,7 +105,7 @@ def search_notes(
     matches = Note.search_vector.op("@@")(tsquery)
     base = select(Note).where(Note.owner_id == owner_id, matches)
     if tag_names:
-        base = base.where(Note.id.in_(_with_all_tags(owner_id, tag_names)))
+        base = base.where(Note.id.in_(note_ids_with_all_tags(owner_id, tag_names)))
     total = db.scalar(select(func.count()).select_from(base.subquery())) or 0
     rank = func.ts_rank(Note.search_vector, tsquery).label("rank")
     rows = db.execute(

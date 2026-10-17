@@ -72,10 +72,11 @@ def link_sql(owner, source, target):
     )
 
 
-def suggestion_sql(owner, source, target):
+def suggestion_sql(owner, source, target, status="pending"):
     return (
-        "INSERT INTO suggestions (id,source_note_id,target_note_id,owner_id,similarity_score,explanation,created_at) "
-        f"VALUES ('{uuid4()}','{source.id}','{target.id}','{owner.id}',0.4,'e',now())"
+        "INSERT INTO suggestions (id,source_note_id,target_note_id,owner_id,similarity_score,explanation,status,"
+        "source_updated_at,target_updated_at,created_at) "
+        f"VALUES ('{uuid4()}','{source.id}','{target.id}','{owner.id}',0.4,'e','{status}',now(),now(),now())"
     )
 
 
@@ -109,10 +110,17 @@ class TestConstraints:
     def test_a_note_cannot_link_to_itself(self, engine, owner, two_notes):
         assert_rejected(engine, link_sql(owner, two_notes[0], two_notes[0]))
 
-    def test_one_pending_suggestion_per_ordered_pair(self, engine, owner, two_notes):
+    def test_one_suggestion_per_note_pair_in_canonical_order(self, engine, owner, two_notes):
         low, high = two_notes
         run(engine, suggestion_sql(owner, low, high))
         assert_rejected(engine, suggestion_sql(owner, low, high))
+        assert_rejected(engine, suggestion_sql(owner, high, low))  # same pair, reversed
+
+    def test_suggestion_status_is_restricted(self, engine, owner, two_notes):
+        low, high = two_notes
+        run(engine, suggestion_sql(owner, low, high, status="rejected"))
+        run(engine, "DELETE FROM suggestions")
+        assert_rejected(engine, suggestion_sql(owner, low, high, status="accepted"))
 
     def test_revoked_token_jti_is_unique(self, engine, owner):
         run(engine, revoked_sql(owner, "abc"))
@@ -133,11 +141,13 @@ class TestCascades:
                     NoteTag(note_id=low.id, tag_id=tag.id),
                     AcceptedLink(source_note_id=low.id, target_note_id=high.id, owner_id=owner.id),
                     Suggestion(
-                        source_note_id=high.id,
-                        target_note_id=low.id,
+                        source_note_id=low.id,
+                        target_note_id=high.id,
                         owner_id=owner.id,
                         similarity_score=1,
                         explanation="e",
+                        source_updated_at=utcnow(),
+                        target_updated_at=utcnow(),
                     ),
                 ]
             )
@@ -234,6 +244,44 @@ class TestMigrations:
             assert conn.execute(text("SELECT count(*) FROM outbox")).scalar_one() == 1
             matching = "SELECT count(*) FROM notes WHERE search_vector @@ to_tsquery('english','kubernetes')"
             assert conn.execute(text(matching)).scalar_one() == 1
+
+    def test_existing_suggestions_are_normalised_by_migration_003(self, sandbox, engine):
+        command.upgrade(sandbox, "002")
+        user = uuid4()
+        a, b, c = sorted([uuid4(), uuid4(), uuid4()])
+        with engine.begin() as conn:
+            conn.execute(
+                text(
+                    "INSERT INTO users (id,email,password_hash,created_at,updated_at) VALUES (:u,'a@b.c','h',now(),now())"
+                ),
+                {"u": user},
+            )
+            for note in (a, b, c):
+                conn.execute(
+                    text(
+                        "INSERT INTO notes (id,owner_id,title,body,created_at,updated_at) VALUES (:n,:u,'t','b',now(),now())"
+                    ),
+                    {"n": note, "u": user},
+                )
+            # (b,a) is reversed; (a,c) and (c,a) are the same pair stored twice.
+            for source, target in ((b, a), (a, c), (c, a)):
+                conn.execute(
+                    text(
+                        "INSERT INTO suggestions (id,source_note_id,target_note_id,owner_id,similarity_score,explanation,created_at)"
+                        " VALUES (:i,:s,:t,:u,0.5,'e',now())"
+                    ),
+                    {"i": uuid4(), "s": source, "t": target, "u": user},
+                )
+
+        command.upgrade(sandbox, "head")
+
+        with engine.connect() as conn:
+            rows = conn.execute(
+                text(
+                    "SELECT source_note_id, target_note_id, status, source_updated_at IS NOT NULL FROM suggestions ORDER BY 1, 2"
+                )
+            ).all()
+        assert [(r[0], r[1], r[2], r[3]) for r in rows] == [(a, b, "pending", True), (a, c, "pending", True)]
 
     def test_models_and_migrations_have_not_drifted(self, engine):
         with engine.connect() as conn:

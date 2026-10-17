@@ -6,19 +6,12 @@ import socket
 import threading
 
 from link_service.consumer import NoteEventConsumer
+from link_service.processing import make_event_handler
 from shared.config import get_settings
-from shared.events import NoteEvent
+from shared.db import get_sessionmaker
 from shared.redis_client import create_redis
 
 logger = logging.getLogger("link_service.worker")
-
-
-def handle_event(event: NoteEvent) -> None:
-    """Placeholder until suggestion generation (IMPL-13) lands; records the event only."""
-    logger.info(
-        "note event received",
-        extra={"event_id": str(event.event_id), "event_type": event.event_type.value, "note_id": str(event.note_id)},
-    )
 
 
 def main() -> None:
@@ -30,7 +23,7 @@ def main() -> None:
     consumer = NoteEventConsumer(
         # The socket timeout must outlast the blocking read or every idle poll would raise.
         create_redis(socket_timeout=settings.consumer_block_ms / 1000 + 10),
-        handle_event,
+        make_event_handler(get_sessionmaker(), settings),
         consumer_name=socket.gethostname(),
         group=settings.consumer_group,
         block_ms=settings.consumer_block_ms,
