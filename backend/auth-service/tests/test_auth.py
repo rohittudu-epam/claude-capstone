@@ -99,7 +99,8 @@ class TestLogin:
         wrong = login(client, password="wrong password!")
         unknown = login(client, email="nobody@example.com")
         assert wrong.status_code == unknown.status_code == 401
-        assert wrong.json() == unknown.json() == {"detail": "Authentication failed"}
+        assert wrong.json()["detail"] == unknown.json()["detail"] == "Authentication failed"
+        assert set(wrong.json()) == set(unknown.json()) == {"detail", "correlation_id"}
         assert "set-cookie" not in wrong.headers
 
     def test_email_is_case_insensitive(self, client, registered):

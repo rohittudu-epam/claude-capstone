@@ -19,6 +19,14 @@ x-backend-deps: &backend-deps
   redis:
     condition: service_healthy
 
+x-worker-health: &worker-health
+  # Workers have no HTTP port; they touch HEARTBEAT_FILE every loop. Unhealthy means the loop is stuck or dead.
+  test: ["CMD-SHELL", "test $$(( $$(date +%s) - $$(stat -c %Y /tmp/heartbeat) )) -lt 60"]
+  interval: 15s
+  timeout: 5s
+  retries: 3
+  start_period: 30s
+
 x-backend-health: &backend-health
   test: ["CMD", "curl", "-fsS", "http://localhost:8000/health"]
   interval: 10s
@@ -145,6 +153,8 @@ services:
     command: ["python", "-m", "note_service.publisher"]
     environment:
       <<: *backend-env
+      HEARTBEAT_FILE: /tmp/heartbeat
+    healthcheck: *worker-health
     depends_on: *backend-deps
     restart: unless-stopped
     networks:
@@ -176,6 +186,8 @@ services:
     command: ["python", "-m", "link_service.worker"]
     environment:
       <<: *backend-env
+      HEARTBEAT_FILE: /tmp/heartbeat
+    healthcheck: *worker-health
     depends_on: *backend-deps
     restart: unless-stopped
     networks:

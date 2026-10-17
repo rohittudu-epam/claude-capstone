@@ -9,6 +9,7 @@ from link_service.consumer import NoteEventConsumer
 from link_service.processing import make_event_handler
 from shared.config import get_settings
 from shared.db import get_sessionmaker
+from shared.jsonlog import configure_logging
 from shared.redis_client import create_redis
 
 logger = logging.getLogger("link_service.worker")
@@ -16,7 +17,7 @@ logger = logging.getLogger("link_service.worker")
 
 def main() -> None:
     settings = get_settings()
-    logging.basicConfig(level=settings.log_level, format="%(asctime)s %(levelname)s %(name)s %(message)s")
+    configure_logging("link-worker", settings.log_level)
     stop = threading.Event()
     for sig in (signal.SIGINT, signal.SIGTERM):
         signal.signal(sig, lambda *_: stop.set())

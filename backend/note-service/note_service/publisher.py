@@ -20,6 +20,8 @@ from sqlalchemy.orm import Session
 from shared.config import get_settings
 from shared.db import get_sessionmaker
 from shared.events import STREAM_NOTE_EVENTS, NoteEvent
+from shared.heartbeat import touch_heartbeat
+from shared.jsonlog import configure_logging
 from shared.models import OutboxEntry
 from shared.redis_client import create_redis
 from shared.timeutil import utcnow
@@ -74,6 +76,7 @@ class OutboxPublisher:
     def run_forever(self, stop: threading.Event, poll_interval: float) -> None:
         failures = 0
         while not stop.is_set():
+            touch_heartbeat()
             try:
                 published = self.publish_pending()
             except (RedisError, SQLAlchemyError) as exc:
@@ -96,7 +99,7 @@ class OutboxPublisher:
 
 def main() -> None:
     settings = get_settings()
-    logging.basicConfig(level=settings.log_level, format="%(asctime)s %(levelname)s %(name)s %(message)s")
+    configure_logging("outbox-publisher", settings.log_level)
     stop = threading.Event()
     for sig in (signal.SIGINT, signal.SIGTERM):
         signal.signal(sig, lambda *_: stop.set())

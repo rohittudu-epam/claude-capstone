@@ -198,7 +198,8 @@ class TestFailureModes:
         finally:
             app.dependency_overrides.clear()
         assert response.status_code == 503
-        assert response.json() == {"detail": "Service temporarily unavailable"}
+        assert response.json()["detail"] == "Service temporarily unavailable"
+        assert response.json()["correlation_id"] == response.headers["x-correlation-id"]
         assert "hunter2" not in response.text and "db.internal" not in response.text
 
 
