@@ -1,0 +1,251 @@
+{
+  "meta": {
+    "generatedAt": "2026-10-16T11:54:09.903Z",
+    "rangeLabel": "all",
+    "agents": [
+      "claude"
+    ],
+    "projectFilter": "all",
+    "totals": {
+      "sessions": 1,
+      "durationMs": 18310981,
+      "turns": 4,
+      "files": 1,
+      "netLines": 24,
+      "toolCallsTotal": 6,
+      "toolSuccessRate": 100,
+      "totalCostUSD": 0.12833457,
+      "cacheReadCostUSD": 0.041485469999999997,
+      "pricedSessions": 1
+    },
+    "unpricedModels": [],
+    "estimatedModels": [],
+    "localModels": [],
+    "coverage": [
+      {
+        "agentName": "claude",
+        "total": 1,
+        "priced": 1,
+        "withLog": 1
+      }
+    ],
+    "userEmail": "rohit_tudu@epam.com",
+    "periodStart": "2026-10-16T06:48:52.627Z",
+    "periodEnd": "2026-10-16T11:54:03.608Z"
+  },
+  "sessions": [
+    {
+      "sessionId": "97e9aafa-a13a-4a6c-8c1f-528e8be48ba6",
+      "agentName": "claude",
+      "provider": "ai-run-sso",
+      "title": "/init",
+      "project": "C:\\Projects\\capstone_projects\\claude-capstone",
+      "branch": "HEAD",
+      "startTime": 1792133332627,
+      "durationMs": 18310981,
+      "turns": 4,
+      "fileOps": 1,
+      "linesAdded": 24,
+      "linesRemoved": 0,
+      "linesModified": 0,
+      "netLines": 24,
+      "filesChanged": 1,
+      "filesWritten": 1,
+      "filesEdited": 0,
+      "toolCallsTotal": 6,
+      "toolCallsSuccess": 6,
+      "toolCallsFailure": 0,
+      "models": [
+        "claude-sonnet-4-5-20250929"
+      ],
+      "languages": [
+        "markdown"
+      ],
+      "tools": [
+        {
+          "toolName": "Bash",
+          "totalCalls": 5,
+          "successCount": 5,
+          "failureCount": 0,
+          "successRate": 100
+        },
+        {
+          "toolName": "Write",
+          "totalCalls": 1,
+          "successCount": 1,
+          "failureCount": 0,
+          "successRate": 100
+        }
+      ],
+      "tokens": {
+        "input": 96,
+        "output": 1027,
+        "cacheRead": 127885,
+        "cacheCreation": 11570,
+        "cacheCreation1h": 11570,
+        "total": 140578
+      },
+      "costUSD": 0.12833457,
+      "cacheReadCostUSD": 0.041485469999999997,
+      "perModelCost": [
+        {
+          "model": "claude-sonnet-4-5-20250929",
+          "tokens": {
+            "input": 10,
+            "output": 400,
+            "cacheRead": 23886,
+            "cacheCreation": 10287,
+            "cacheCreation1h": 10287,
+            "total": 34583
+          },
+          "costUSD": 0.0749178,
+          "unpriced": false
+        },
+        {
+          "model": "claude-sonnet-4-5-20250929",
+          "tokens": {
+            "input": 86,
+            "output": 627,
+            "cacheRead": 103999,
+            "cacheCreation": 1283,
+            "cacheCreation1h": 1283,
+            "total": 105995
+          },
+          "costUSD": 0.05341677,
+          "unpriced": false
+        }
+      ],
+      "hadLog": true,
+      "agentSessionFile": "C:\\Users\\RohitTudu\\.claude\\projects\\C--Projects-capstone-projects-claude-capstone\\40d83cf1-5f32-4b25-85b9-9a53731b94e9.jsonl",
+      "costSeries": [
+        {
+          "t": 1792133353380,
+          "cost": 0.0749178,
+          "tokens": 34583
+        },
+        {
+          "t": 1792133403646,
+          "cost": 0.09252759,
+          "tokens": 69527
+        },
+        {
+          "t": 1792133432634,
+          "cost": 0.11116236000000002,
+          "tokens": 104938
+        },
+        {
+          "t": 1792133440776,
+          "cost": 0.12833457,
+          "tokens": 140578
+        }
+      ],
+      "dispatches": [
+        {
+          "kind": "command",
+          "name": "init",
+          "start": 1792133333553,
+          "durationMs": 0,
+          "id": "command:f3c28a1a-cacf-4af1-aa43-0d9ece794dfd:0",
+          "ownerAgentId": "97e9aafa-a13a-4a6c-8c1f-528e8be48ba6",
+          "relationshipStatus": "root",
+          "elapsedMs": 0,
+          "status": "completed",
+          "attributionStatus": "unavailable",
+          "attributionScope": "owner-window"
+        },
+        {
+          "kind": "command",
+          "name": "plugin",
+          "start": 1792151604550,
+          "durationMs": 0,
+          "id": "command:a18348e8-2737-43ee-91e4-96eb5302dde9:0",
+          "ownerAgentId": "97e9aafa-a13a-4a6c-8c1f-528e8be48ba6",
+          "relationshipStatus": "root",
+          "elapsedMs": 0,
+          "status": "completed",
+          "attributionStatus": "unavailable",
+          "attributionScope": "owner-window"
+        },
+        {
+          "kind": "command",
+          "name": "plugin",
+          "start": 1792151632429,
+          "durationMs": 0,
+          "id": "command:2e0513ae-add6-48ba-9964-4c50d36b19cf:0",
+          "ownerAgentId": "97e9aafa-a13a-4a6c-8c1f-528e8be48ba6",
+          "relationshipStatus": "root",
+          "elapsedMs": 0,
+          "status": "completed",
+          "attributionStatus": "unavailable",
+          "attributionScope": "owner-window"
+        }
+      ],
+      "costSource": "native-estimate",
+      "costBasis": "standard-api-tokens",
+      "dispatchesComplete": true,
+      "rootOwnCostUSD": 0.1234785,
+      "unlinkedCostUSD": 0,
+      "unlinkedAgentIds": [],
+      "rootOwnTokens": {
+        "input": 96,
+        "output": 1027,
+        "cacheRead": 127885,
+        "cacheCreation": 11570,
+        "cacheCreation1h": 11570,
+        "total": 140578
+      },
+      "unlinkedTokens": {
+        "input": 0,
+        "output": 0,
+        "cacheRead": 0,
+        "cacheCreation": 0,
+        "cacheCreation1h": 0,
+        "total": 0
+      },
+      "modelTimeline": [
+        {
+          "t": 1792133353380,
+          "model": "claude-sonnet-4-5-20250929",
+          "costUSD": 0.0749178,
+          "tokens": 34583
+        },
+        {
+          "t": 1792133403646,
+          "model": "claude-sonnet-4-5-20250929",
+          "costUSD": 0.01760979,
+          "tokens": 34944
+        },
+        {
+          "t": 1792133432634,
+          "model": "claude-sonnet-4-5-20250929",
+          "costUSD": 0.01863477,
+          "tokens": 35411
+        },
+        {
+          "t": 1792133440776,
+          "model": "claude-sonnet-4-5-20250929",
+          "costUSD": 0.01717221,
+          "tokens": 35640
+        }
+      ],
+      "routedTurnsPct": 0,
+      "skillInvocations": [],
+      "agentInvocations": [],
+      "commandInvocations": [
+        {
+          "name": "plugin",
+          "totalCalls": 2,
+          "successCount": 2,
+          "failureCount": 0
+        },
+        {
+          "name": "init",
+          "totalCalls": 1,
+          "successCount": 1,
+          "failureCount": 0
+        }
+      ],
+      "sessionSource": "Pure chat"
+    }
+  ]
+}
