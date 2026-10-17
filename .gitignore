@@ -77,3 +77,6 @@ logs/
 *.tsbuildinfo
 playwright-report/
 test-results/
+
+# PR documentation (local reference only)
+.pr-info/
