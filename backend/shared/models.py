@@ -1,5 +1,7 @@
 """Shared SQLAlchemy models for LinkNote MVP."""
 
+from __future__ import annotations
+
 from datetime import datetime
 from uuid import UUID as PyUUID
 from uuid import uuid4

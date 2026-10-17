@@ -1,5 +1,7 @@
 """Environment-driven settings shared by all backend services."""
 
+from __future__ import annotations
+
 from functools import lru_cache
 
 from pydantic import Field, model_validator

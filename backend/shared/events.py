@@ -6,6 +6,8 @@ is optional and links worker logs to the request that caused the event. Consumer
 ignore unknown fields so the contract can grow within a schema version.
 """
 
+from __future__ import annotations
+
 from datetime import datetime
 from enum import StrEnum
 from uuid import UUID
