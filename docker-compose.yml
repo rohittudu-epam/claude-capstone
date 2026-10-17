@@ -210,20 +210,16 @@ services:
       - "traefik.http.routers.graph.rule=PathPrefix(`/api/graph`)"
       - "traefik.http.services.graph.loadbalancer.server.port=8000"
 
-  # The frontend is scaffolded in IMPL-18. Until then it is opt-in: `docker compose --profile frontend up`.
   frontend:
-    profiles: ["frontend"]
     build:
       context: ./frontend
-      dockerfile: Dockerfile
     container_name: linknote-frontend
-    environment:
-      NEXT_PUBLIC_API_BASE_URL: http://localhost
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3000/login"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 10s
     depends_on:
       - traefik
     networks:

@@ -14,7 +14,7 @@ pass() { printf 'PASS  %s\n' "$1"; }
 fail() { printf 'FAIL  %s\n' "$1"; failures=$((failures + 1)); }
 
 echo "== containers"
-for service in postgres redis traefik migrate auth-service note-service link-service graph-service outbox-publisher link-worker; do
+for service in postgres redis traefik migrate auth-service note-service link-service graph-service outbox-publisher link-worker frontend; do
   id=$(docker compose ps -a -q "$service" 2>/dev/null)
   if [ -z "$id" ]; then fail "$service: container not found"; continue; fi
   state=$(docker inspect --format '{{.State.Status}}|{{if .State.Health}}{{.State.Health.Status}}{{else}}-{{end}}|{{.State.ExitCode}}' "$id")
@@ -41,6 +41,12 @@ echo "== routing and authentication through the proxy ($BASE)"
 for path in /api/auth/verify /api/notes /api/tags /api/suggestions /api/links /api/graph; do
   code=$(curl -s -o /dev/null -w '%{http_code}' "$BASE$path")
   [ "$code" = "401" ] && pass "$path -> 401 (routed, authentication enforced)" || fail "$path -> $code (expected 401)"
+done
+
+echo "== web interface"
+for path in /login /register; do
+  code=$(curl -s -o /dev/null -w '%{http_code}' "$BASE$path")
+  [ "$code" = "200" ] && pass "$path -> 200" || fail "$path -> $code (expected 200)"
 done
 
 echo
