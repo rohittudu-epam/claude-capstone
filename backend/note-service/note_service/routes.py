@@ -14,11 +14,11 @@ from note_service.schemas import (
     SearchHit,
     SearchPage,
     TagOut,
-    normalize_tags,
 )
 from shared.auth import get_current_user_id
 from shared.db import get_db
 from shared.models import Note
+from shared.tags import parse_tag_filter
 
 MAX_QUERY_LENGTH = 200
 
@@ -32,10 +32,8 @@ Offset = Annotated[int, Query(ge=0)]
 
 
 def _tag_filter(raw: list[str]) -> list[str]:
-    """Accepts `?tags=a,b` and/or repeated `?tags=a&tags=b`."""
-    parts = [piece for value in raw for piece in value.split(",") if piece.strip()]
     try:
-        return normalize_tags(parts)
+        return parse_tag_filter(raw)
     except ValueError as exc:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, f"Invalid tags filter: {exc}") from None
 

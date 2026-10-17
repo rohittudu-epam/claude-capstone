@@ -8,6 +8,10 @@ x-backend-env: &backend-env
   ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-15}
   REFRESH_TOKEN_EXPIRE_DAYS: ${REFRESH_TOKEN_EXPIRE_DAYS:-7}
   COOKIE_SECURE: ${COOKIE_SECURE:-true}
+  LINK_SUGGESTION_THRESHOLD: ${LINK_SUGGESTION_THRESHOLD:-0.30}
+  LINK_SUGGESTION_MIN_SHARED_KEYWORDS: ${LINK_SUGGESTION_MIN_SHARED_KEYWORDS:-2}
+  LINK_SUGGESTION_MAX_PER_NOTE: ${LINK_SUGGESTION_MAX_PER_NOTE:-10}
+  GRAPH_MAX_NODES: ${GRAPH_MAX_NODES:-500}
 
 x-backend-deps: &backend-deps
   migrate:
@@ -160,7 +164,7 @@ services:
       - backend
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.link.rule=PathPrefix(`/api/suggestions`)"
+      - "traefik.http.routers.link.rule=PathPrefix(`/api/suggestions`) || PathPrefix(`/api/links`)"
       - "traefik.http.services.link.loadbalancer.server.port=8000"
 
   link-worker:

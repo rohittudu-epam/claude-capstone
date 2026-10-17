@@ -99,6 +99,12 @@ class AcceptedLink(Base):
 
 
 class Suggestion(Base):
+    """One suggestion per unordered note pair (source_note_id < target_note_id).
+
+    `*_updated_at` record the note versions the score was computed from. A suggestion (or a
+    rejection) only applies while both notes still have those versions; otherwise it is stale.
+    """
+
     __tablename__ = "suggestions"
 
     id: Mapped[PyUUID] = mapped_column(primary_key=True, default=uuid4)
@@ -107,10 +113,16 @@ class Suggestion(Base):
     owner_id: Mapped[PyUUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
     similarity_score: Mapped[float] = mapped_column(Float)
     explanation: Mapped[str] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(String(20), default="pending")
+    source_updated_at: Mapped[datetime] = mapped_column(DateTime)
+    target_updated_at: Mapped[datetime] = mapped_column(DateTime)
+    rejected_at: Mapped[datetime | None] = mapped_column(DateTime)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
 
     __table_args__ = (
         UniqueConstraint("source_note_id", "target_note_id", name="uq_suggestions_pair"),
+        CheckConstraint("source_note_id < target_note_id", name="ck_suggestions_canonical_order"),
+        CheckConstraint("status IN ('pending', 'rejected')", name="ck_suggestions_status"),
         Index("ix_suggestions_owner_id_created_at", "owner_id", "created_at"),
     )
 

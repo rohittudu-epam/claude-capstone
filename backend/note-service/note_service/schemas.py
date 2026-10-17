@@ -5,30 +5,12 @@ from uuid import UUID
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field, field_validator
 
 from shared.config import get_settings
+from shared.tags import MAX_TAGS_PER_NOTE, normalize_tags
 from shared.timeutil import as_utc
 
 UTCDatetime = Annotated[datetime, AfterValidator(as_utc)]
 
 MAX_TITLE_LENGTH = 500
-MAX_TAG_LENGTH = 50
-MAX_TAGS_PER_NOTE = 20
-
-
-def normalize_tag(raw: str) -> str:
-    """Lowercase, trim, and collapse internal whitespace to single spaces."""
-    return " ".join(raw.lower().split())
-
-
-def normalize_tags(raw_tags: list[str]) -> list[str]:
-    seen: dict[str, None] = {}
-    for raw in raw_tags:
-        tag = normalize_tag(raw)
-        if not tag:
-            raise ValueError("tags must not be blank")
-        if len(tag) > MAX_TAG_LENGTH:
-            raise ValueError(f"tags must be at most {MAX_TAG_LENGTH} characters")
-        seen.setdefault(tag)
-    return list(seen)
 
 
 class NoteContent(BaseModel):

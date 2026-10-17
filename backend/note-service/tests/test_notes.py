@@ -11,6 +11,7 @@ from note_service.main import app
 from shared.config import get_settings
 from shared.models import AcceptedLink, Note, NoteTag, OutboxEntry, RevokedToken, Suggestion, Tag
 from shared.security import ACCESS
+from shared.timeutil import utcnow
 
 
 @pytest.fixture
@@ -143,11 +144,13 @@ class TestCrud:
             db.add(AcceptedLink(source_note_id=low, target_note_id=high, owner_id=alice.id))
             db.add(
                 Suggestion(
-                    source_note_id=first["id"],
-                    target_note_id=second["id"],
+                    source_note_id=low,
+                    target_note_id=high,
                     owner_id=alice.id,
                     similarity_score=0.5,
                     explanation="shared: x",
+                    source_updated_at=utcnow(),
+                    target_updated_at=utcnow(),
                 )
             )
             db.commit()

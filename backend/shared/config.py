@@ -32,6 +32,12 @@ class Settings(BaseSettings):
     outbox_poll_interval_seconds: float = Field(default=1.0, gt=0)
     note_events_stream_maxlen: int = Field(default=100_000, gt=0)
 
+    link_suggestion_threshold: float = Field(default=0.30, gt=0, le=1)
+    link_suggestion_min_shared_keywords: int = Field(default=2, ge=1)
+    link_suggestion_max_per_note: int = Field(default=10, gt=0)
+    link_candidate_limit: int = Field(default=200, gt=0)
+    graph_max_nodes: int = Field(default=500, gt=0)
+
     consumer_group: str = "link-service"
     consumer_block_ms: int = Field(default=5000, gt=0)
     consumer_claim_idle_ms: int = Field(default=60_000, ge=0)
