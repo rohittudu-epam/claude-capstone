@@ -1,0 +1,37 @@
+{
+  "project": {
+    "name": "agentic-sdlc-pipeline",
+    "description": "Agentic SDLC Pipeline — 8-stage workflow from requirements to PR, orchestrated by Claude Code agents"
+  },
+  "agents": {
+    "directory": ".claude/agents",
+    "orchestrator": "orchestrator.md"
+  },
+  "skills": {
+    "directory": ".claude/skills"
+  },
+  "permissions": {
+    "allow": [
+      "Read",
+      "Write",
+      "Edit",
+      "Bash(git *)",
+      "Bash(npm *)",
+      "Bash(npx *)",
+      "Bash(python *)",
+      "Bash(pip *)",
+      "Bash(pytest *)",
+      "Bash(go *)",
+      "Bash(gh *)",
+      "Bash(cat *)",
+      "Bash(ls *)",
+      "Bash(mkdir *)"
+    ],
+    "deny": [
+      "Bash(rm -rf /)",
+      "Bash(sudo *)",
+      "Bash(curl * | sh)",
+      "Bash(wget * | sh)"
+    ]
+  }
+}

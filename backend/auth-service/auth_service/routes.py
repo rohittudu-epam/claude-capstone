@@ -110,7 +110,7 @@ def refresh(request: Request, response: Response, db: Session = Depends(get_db))
         # Rotation: the presented refresh token is spent. The unique jti makes concurrent reuse fail.
         db.add(RevokedToken(user_id=claims.user_id, token_jti=claims.jti, expires_at=claims.expires_at))
         db.commit()
-    except InvalidTokenError, IntegrityError:
+    except (InvalidTokenError, IntegrityError):
         db.rollback()
         _clear_session_cookies(response)
         raise _auth_error() from None
