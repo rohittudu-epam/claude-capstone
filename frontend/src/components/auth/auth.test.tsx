@@ -171,7 +171,10 @@ describe("RegisterForm", () => {
 
 describe("AuthGate", () => {
   it("renders nothing private and redirects to sign-in when there is no session", async () => {
-    mockFetch({ "GET /api/auth/me": { status: 401, json: { detail: "Not authenticated" } } });
+    mockFetch({
+      "GET /api/auth/me": { status: 401, json: { detail: "Not authenticated" } },
+      "POST /api/auth/refresh": { status: 401, json: { detail: "Authentication failed" } },
+    });
     renderWithClient(
       <AuthGate>
         <p>secret page content</p>

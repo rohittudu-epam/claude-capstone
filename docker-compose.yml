@@ -120,9 +120,13 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.auth.rule=PathPrefix(`/api/auth`)"
-      - "traefik.http.routers.auth.middlewares=auth-ratelimit"
+      - "traefik.http.routers.auth.service=auth"
       - "traefik.http.services.auth.loadbalancer.server.port=8000"
-      # Brute-force protection for login/refresh/verify (FR-3): per client IP.
+      # Brute-force protection (FR-3): per client IP, on the credential endpoints only. The longer rule wins
+      # routing priority; /me and /logout need a valid session and are called on every page load.
+      - "traefik.http.routers.auth-credentials.rule=PathPrefix(`/api/auth/login`) || PathPrefix(`/api/auth/register`) || PathPrefix(`/api/auth/refresh`)"
+      - "traefik.http.routers.auth-credentials.service=auth"
+      - "traefik.http.routers.auth-credentials.middlewares=auth-ratelimit"
       - "traefik.http.middlewares.auth-ratelimit.ratelimit.average=30"
       - "traefik.http.middlewares.auth-ratelimit.ratelimit.period=1m"
       - "traefik.http.middlewares.auth-ratelimit.ratelimit.burst=10"

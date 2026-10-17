@@ -111,4 +111,27 @@ describe("session refresh", () => {
     await expect(api.login({ email: "a@b.c", password: "x" })).rejects.toMatchObject({ status: 401 });
     expect(to("POST", "/api/auth/refresh")).toHaveLength(0);
   });
+
+  it("does not announce an expired session when /me fails for a visitor with no session", async () => {
+    mockFetch({
+      "GET /api/auth/me": { status: 401, json: {} },
+      "POST /api/auth/refresh": { status: 401, json: {} },
+    });
+    const listener = vi.fn();
+    const off = onSessionExpired(listener);
+    await expect(api.me()).rejects.toMatchObject({ status: 401 });
+    expect(listener).not.toHaveBeenCalled();
+    off();
+  });
+
+  it("does refresh when the session check (/me) finds an expired access token", async () => {
+    let attempts = 0;
+    const { to } = mockFetch({
+      "GET /api/auth/me": () =>
+        ++attempts === 1 ? { status: 401, json: {} } : { json: { id: "u", email: "a@b.c", created_at: "2026-01-01T00:00:00Z" } },
+      "POST /api/auth/refresh": { json: {} },
+    });
+    await expect(api.me()).resolves.toMatchObject({ id: "u" });
+    expect(to("POST", "/api/auth/refresh")).toHaveLength(1);
+  });
 });

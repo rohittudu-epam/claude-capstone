@@ -63,8 +63,11 @@ function refreshOnce(): Promise<boolean> {
   return refreshInFlight;
 }
 
+/** A 401 from these means "wrong credentials / no session to refresh", not "access token expired". */
+const NO_REFRESH_ENDPOINTS = new Set(["/api/auth/login", "/api/auth/register", "/api/auth/refresh", "/api/auth/logout"]);
+
 function isAuthEndpoint(path: string): boolean {
-  return path.startsWith("/api/auth/");
+  return NO_REFRESH_ENDPOINTS.has(path);
 }
 
 async function send(method: string, path: string, body?: unknown): Promise<Response> {
@@ -104,7 +107,8 @@ export async function request<T>(method: string, path: string, body?: unknown): 
       response = await send(method, path, body);
     }
     if (response.status === 401) {
-      expiredListeners.forEach((listener) => listener());
+      // The session check itself is handled by the auth gate: a visitor with no session is not "expired".
+      if (path !== "/api/auth/me") expiredListeners.forEach((listener) => listener());
       throw await toError(response, path);
     }
   }
