@@ -6,6 +6,7 @@ from uuid import UUID, uuid4
 from sqlalchemy.orm import Session
 
 from shared.events import EVENT_SCHEMA_VERSION, NoteEvent, NoteEventType
+from shared.jsonlog import current_correlation_id
 from shared.models import OutboxEntry
 
 
@@ -19,6 +20,7 @@ def add_note_event(
         note_id=note_id,
         owner_id=owner_id,
         occurred_at=occurred_at,
+        correlation_id=current_correlation_id(),
     )
     entry = OutboxEntry(
         id=event.event_id,

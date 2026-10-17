@@ -19,6 +19,14 @@ x-backend-deps: &backend-deps
   redis:
     condition: service_healthy
 
+x-worker-health: &worker-health
+  # Workers have no HTTP port; they touch HEARTBEAT_FILE every loop. Unhealthy means the loop is stuck or dead.
+  test: ["CMD-SHELL", "test $$(( $$(date +%s) - $$(stat -c %Y /tmp/heartbeat) )) -lt 60"]
+  interval: 15s
+  timeout: 5s
+  retries: 3
+  start_period: 30s
+
 x-backend-health: &backend-health
   test: ["CMD", "curl", "-fsS", "http://localhost:8000/health"]
   interval: 10s
@@ -112,9 +120,13 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.auth.rule=PathPrefix(`/api/auth`)"
-      - "traefik.http.routers.auth.middlewares=auth-ratelimit"
+      - "traefik.http.routers.auth.service=auth"
       - "traefik.http.services.auth.loadbalancer.server.port=8000"
-      # Brute-force protection for login/refresh/verify (FR-3): per client IP.
+      # Brute-force protection (FR-3): per client IP, on the credential endpoints only. The longer rule wins
+      # routing priority; /me and /logout need a valid session and are called on every page load.
+      - "traefik.http.routers.auth-credentials.rule=PathPrefix(`/api/auth/login`) || PathPrefix(`/api/auth/register`) || PathPrefix(`/api/auth/refresh`)"
+      - "traefik.http.routers.auth-credentials.service=auth"
+      - "traefik.http.routers.auth-credentials.middlewares=auth-ratelimit"
       - "traefik.http.middlewares.auth-ratelimit.ratelimit.average=30"
       - "traefik.http.middlewares.auth-ratelimit.ratelimit.period=1m"
       - "traefik.http.middlewares.auth-ratelimit.ratelimit.burst=10"
@@ -145,6 +157,8 @@ services:
     command: ["python", "-m", "note_service.publisher"]
     environment:
       <<: *backend-env
+      HEARTBEAT_FILE: /tmp/heartbeat
+    healthcheck: *worker-health
     depends_on: *backend-deps
     restart: unless-stopped
     networks:
@@ -176,6 +190,8 @@ services:
     command: ["python", "-m", "link_service.worker"]
     environment:
       <<: *backend-env
+      HEARTBEAT_FILE: /tmp/heartbeat
+    healthcheck: *worker-health
     depends_on: *backend-deps
     restart: unless-stopped
     networks:
@@ -198,20 +214,16 @@ services:
       - "traefik.http.routers.graph.rule=PathPrefix(`/api/graph`)"
       - "traefik.http.services.graph.loadbalancer.server.port=8000"
 
-  # The frontend is scaffolded in IMPL-18. Until then it is opt-in: `docker compose --profile frontend up`.
   frontend:
-    profiles: ["frontend"]
     build:
       context: ./frontend
-      dockerfile: Dockerfile
     container_name: linknote-frontend
-    environment:
-      NEXT_PUBLIC_API_BASE_URL: http://localhost
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3000/login"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 10s
     depends_on:
       - traefik
     networks:

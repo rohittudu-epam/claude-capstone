@@ -16,6 +16,7 @@ class Settings(BaseSettings):
 
     environment: str = "development"
     log_level: str = "INFO"
+    heartbeat_file: str | None = None
 
     database_url: str = "postgresql://linknote:linknote_password@localhost:5432/linknote"
     redis_url: str = "redis://localhost:6379"

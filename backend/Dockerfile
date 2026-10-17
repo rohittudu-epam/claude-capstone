@@ -25,4 +25,4 @@ USER app
 EXPOSE 8000
 # Each service directory holds one package named after it (note-service -> note_service).
 ENV SERVICE_DIR=${SERVICE}
-CMD ["sh", "-c", "exec uvicorn $(echo $SERVICE_DIR | tr - _).main:app --host 0.0.0.0 --port 8000"]
+CMD ["sh", "-c", "exec uvicorn $(echo $SERVICE_DIR | tr - _).main:app --host 0.0.0.0 --port 8000 --no-access-log"]

@@ -49,7 +49,7 @@
       "notes": "Status reconciled from git history (commit 4368d13). 28 tasks, IMPL-1 to IMPL-28."
     },
     "implementation": {
-      "status": "IN_PROGRESS",
+      "status": "AWAITING_APPROVAL",
       "agent": "implementation-agent",
       "artifacts": [
         ".env.example",
@@ -67,14 +67,21 @@
         "backend/note-service/",
         "backend/shared/",
         "docker-compose.yml",
+        "docs/api/",
+        "docs/database.md",
+        "docs/deployment.md",
+        "docs/getting-started.md",
         "docs/implementation-notes.md",
-        "frontend/Dockerfile",
-        "frontend/package.json"
+        "docs/testing.md",
+        "frontend/",
+        "scripts/export-openapi.py",
+        "scripts/measure-search.sh",
+        "scripts/verify-deployment.sh"
       ],
       "started_at": "2026-10-17T00:00:00Z",
       "completed_at": null,
       "retries": 0,
-      "notes": "Phases 1-2 (IMPL-1 to IMPL-12) merged to local main. Phase 3 (IMPL-13 to IMPL-17: suggestion algorithm, suggestion/link endpoints, suggestion model changes, graph API, event durability tests) on feature/phase-3-link-suggestions. Verification: 207 backend tests pass (PostgreSQL via PGlite, fakeredis plus real Redis for durability tests), ruff and mypy clean, 96% coverage; full Docker stack rebuilt and an 18-check end-to-end journey passed through Traefik, including a real Redis stop/start. Not yet verified: concurrent-race IntegrityError branches in auth, search/graph performance on real PostgreSQL (measured on PGlite only). Deviations in docs/implementation-notes.md. Phase 4 (IMPL-18 to IMPL-28: frontend, integration tests, health/logging, docs, final verification) pending; awaiting user go-ahead."
+      "notes": "Phases 1-2 (IMPL-1 to IMPL-12) merged to local main. Phase 3 (IMPL-13 to IMPL-17: suggestion algorithm, suggestion/link endpoints, suggestion model changes, graph API, event durability tests) on feature/phase-3-link-suggestions. Verification: 207 backend tests pass (PostgreSQL via PGlite, fakeredis plus real Redis for durability tests), ruff and mypy clean, 96% coverage; full Docker stack rebuilt and an 18-check end-to-end journey passed through Traefik, including a real Redis stop/start. Not yet verified: concurrent-race IntegrityError branches in auth, search/graph performance on real PostgreSQL (measured on PGlite only). Deviations in docs/implementation-notes.md. Phase 4 (IMPL-18 to IMPL-28: Next.js frontend, structured logging and health checks, Playwright e2e, documentation, final verification) is complete on feature/phase-4-frontend-and-release and awaits user approval to merge to main (stage 5 gate). Phase 4 verification: 241 backend tests pass on real PostgreSQL 15 and real Redis; ruff, format and CI mypy clean; 89 frontend unit tests; lint, typecheck and build clean; 12 Playwright tests pass on the dev stack and again on a clean-clone deployment (cold build 3m46s, verify-deployment.sh all PASS, no secrets in logs); search p95 27-59 ms and graph p95 95 ms at 10,000 notes on real PostgreSQL; 500-node graph renders in 0.64-1.7 s; backup/restore round trip verified. Defects found and fixed by e2e: reload after access-token expiry signed the user out; rate limit throttled /me (now login, register, refresh only). Not verified: auth IntegrityError race branches, TLS, scaling beyond one instance, e2e in CI, low-end-hardware render time. Deviations in docs/implementation-notes.md."
     },
     "review": {
       "status": "PENDING",
@@ -110,6 +117,6 @@
   "branching": {
     "strategy": "GitHub Flow (see docs/branching-strategy.md)",
     "default_branch": "main",
-    "active_branch": "feature/phase-3-link-suggestions"
+    "active_branch": "feature/phase-4-frontend-and-release"
   }
 }

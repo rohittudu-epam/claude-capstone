@@ -1,6 +1,6 @@
 import time
 from datetime import UTC, datetime, timedelta
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import jwt
 import pytest
@@ -99,7 +99,8 @@ class TestLogin:
         wrong = login(client, password="wrong password!")
         unknown = login(client, email="nobody@example.com")
         assert wrong.status_code == unknown.status_code == 401
-        assert wrong.json() == unknown.json() == {"detail": "Authentication failed"}
+        assert wrong.json()["detail"] == unknown.json()["detail"] == "Authentication failed"
+        assert set(wrong.json()) == set(unknown.json()) == {"detail", "correlation_id"}
         assert "set-cookie" not in wrong.headers
 
     def test_email_is_case_insensitive(self, client, registered):
@@ -216,6 +217,28 @@ class TestVerifyAndLogout:
         assert client.post("/api/auth/logout").status_code == 204
         replay = TestClient(app)
         assert replay.post("/api/auth/logout").status_code == 204
+
+
+class TestMe:
+    def test_returns_the_signed_in_user(self, client, registered):
+        login(client)
+        response = client.get("/api/auth/me")
+        assert response.status_code == 200
+        assert response.json()["email"] == "alice@example.com" and response.json()["id"] == registered["id"]
+        assert set(response.json()) == {"id", "email", "created_at"}
+
+    def test_requires_a_valid_session(self, client, registered):
+        assert client.get("/api/auth/me").status_code == 401
+        login(client)
+        client.post("/api/auth/logout")
+        assert client.get("/api/auth/me").status_code == 401
+
+    def test_rejects_a_token_for_a_user_that_no_longer_exists(self, client, registered, session_factory):
+        login(client)
+        with session_factory() as db:
+            db.delete(db.get(User, UUID(registered["id"])))
+            db.commit()
+        assert client.get("/api/auth/me").status_code == 401
 
 
 class TestHealth:

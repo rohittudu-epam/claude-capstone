@@ -19,6 +19,8 @@ from redis import Redis
 from redis.exceptions import RedisError, ResponseError
 
 from shared.events import STREAM_NOTE_EVENTS, STREAM_NOTE_EVENTS_DEAD, EventSchemaError, NoteEvent
+from shared.heartbeat import touch_heartbeat
+from shared.jsonlog import correlation_context
 from shared.timeutil import utcnow
 
 logger = logging.getLogger(__name__)
@@ -77,6 +79,7 @@ class NoteEventConsumer:
         failures = 0
         group_ready = False
         while not stop.is_set():
+            touch_heartbeat()
             try:
                 if not group_ready:
                     self.ensure_group()
@@ -119,7 +122,8 @@ class NoteEventConsumer:
             except EventSchemaError as exc:
                 self._dead_letter(message_id, fields, f"unreadable event: {exc}")
                 continue
-            self._process(message_id, fields, event)
+            with correlation_context(event.correlation_id or event.event_id.hex):
+                self._process(message_id, fields, event)
         return count
 
     def _process(self, message_id: str, fields: dict[str, str], event: NoteEvent) -> None:

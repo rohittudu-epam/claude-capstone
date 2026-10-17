@@ -61,14 +61,16 @@ jobs:
       - name: Detect Next.js app
         id: detect
         run: |
-          if [ -d app ] || [ -d src/app ]; then echo "present=true" >> "$GITHUB_OUTPUT"; else echo "present=false"; fi
+          if [ -d src/app ]; then echo "present=true" >> "$GITHUB_OUTPUT"; else echo "present=false"; fi
       - uses: actions/setup-node@v4
         if: steps.detect.outputs.present == 'true'
         with:
-          node-version: "20"
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
       - name: Install dependencies
         if: steps.detect.outputs.present == 'true'
-        run: npm install
+        run: npm ci
       - name: Lint
         if: steps.detect.outputs.present == 'true'
         run: npm run lint
@@ -78,6 +80,9 @@ jobs:
       - name: Tests
         if: steps.detect.outputs.present == 'true'
         run: npm test
+      - name: Production build
+        if: steps.detect.outputs.present == 'true'
+        run: npm run build
 
   compose:
     runs-on: ubuntu-latest

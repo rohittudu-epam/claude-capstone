@@ -9,7 +9,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from auth_service.schemas import LoginRequest, RegisterRequest, SessionOut, UserOut
-from shared.auth import ACCESS_COOKIE, REFRESH_COOKIE, bearer_token, is_revoked
+from shared.auth import ACCESS_COOKIE, REFRESH_COOKIE, bearer_token, get_current_user_id, is_revoked
 from shared.config import get_settings
 from shared.db import get_db
 from shared.models import RevokedToken, User
@@ -156,3 +156,12 @@ def verify(
         "token_type": claims.token_type,
         "expires_at": claims.expires_at.isoformat() + "Z",
     }
+
+
+@router.get("/me", response_model=UserOut)
+def me(user_id: UUID = Depends(get_current_user_id), db: Session = Depends(get_db)) -> User:
+    """The signed-in user, so a client can tell whether its session is still valid."""
+    user = db.get(User, user_id)
+    if user is None:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Not authenticated")
+    return user
