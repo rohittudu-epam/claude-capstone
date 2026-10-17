@@ -1,6 +1,6 @@
 # Implementation Notes
 
-Records what Phases 1-3 actually built, where it departs from `impl-plan.md` / `architecture.md` and why, how to run the tests, and what is not yet verified.
+Records what Phases 1-4 actually built, where it departs from `impl-plan.md` / `architecture.md` and why, how to run the tests, and what is not yet verified.
 
 ## Backend layout
 
@@ -68,7 +68,12 @@ Event contract (`note_events` stream, schema version 1): `event_id`, `schema_ver
 | Graph limits | 500 nodes | 500 nodes, configurable with `GRAPH_MAX_NODES` | Makes the cap testable. |
 | Docker build | Per-service contexts | One parameterized Dockerfile, context `backend/` | Per-service contexts could not import `shared`. |
 | Published ports | Every service published | Only Traefik (80/443), plus Postgres/Redis/dashboard on 127.0.0.1 | Backend services must not be reachable around the proxy. |
-| Frontend in Compose | Always started | Behind the `frontend` profile until IMPL-18 | There is no frontend to build yet. |
+| Frontend in Compose | Always started | Always started (the Phase 2-3 `frontend` profile was removed in Phase 4) | The frontend exists now. |
+| Rate-limit scope (Phase 4) | All of `/api/auth` | `login`, `register` and `refresh` only (separate Traefik router with the middleware) | `/me` runs on every page load and needs a session anyway; limiting it throttled normal use and made repeated e2e runs fail with 429. Brute-force protection only needs the credential endpoints. |
+| Frontend stack (IMPL-18 to 22) | Next.js, shadcn/ui, graph library | Next.js 15 App Router, React 19, Tailwind v4, hand-written shadcn-style components (no `shadcn` CLI), TanStack Query, `react-force-graph-2d`, `react-markdown` without raw HTML | Same choices as planned; components are written by hand to avoid a generated-code dependency. The graph also has an accessible list view, which the plan did not ask for. |
+| Session refresh in the browser | Not specified | The API client refreshes once on a 401 (shared between concurrent requests) and retries. `/me` refreshes too but never announces "session expired" | Found by the e2e suite: a reload after the 15-minute access token expired signed the user out although the refresh token was valid. |
+| End-to-end tests | Cypress or Playwright | Playwright (Chromium) with axe-core, not run in CI | Needs the full stack; CI only builds and starts it. |
+| Structured logging (IMPL-26) | JSON logs | JSON logs with secret redaction, per-request correlation ids (header, error bodies, events), heartbeat-file health checks for the two workers | SQLAlchemy exception text is never logged because it can contain parameter values. |
 | Python and pins | 3.11, old pins | 3.14 and the exact versions in `backend/requirements.txt` | Those are the versions the tests ran on; the old pins do not install on 3.14. |
 
 ## Running the tests
@@ -98,11 +103,23 @@ Checked 2026-10-17 on Docker Desktop (Engine 29.8.1) with `docker compose build 
 - Phase 3 journey (18 checks): two similar notes and one unrelated note produced exactly one suggestion; accept created one link, visible from both notes, and a repeat accept was a 404; the graph showed 3 nodes and 1 edge, and an AND tag filter dropped the edge; a new similar note produced suggestions and a rejection stayed rejected.
 - Real Redis outage: with the Redis container stopped, note creation still returned 201 and no suggestion appeared; after Redis restarted, the queued event was published and the suggestion appeared.
 
+### Phase 4 (2026-10-17)
+
+- **Backend:** 241 tests pass against real PostgreSQL 15 and real Redis (108 s), including the Redis durability file; `ruff check`, `ruff format --check` and the CI `mypy` command are clean.
+- **Frontend:** `npm run lint`, `typecheck`, `build` clean; 89 unit tests pass.
+- **End to end:** 12 Playwright tests pass against the running stack, twice: once on the development stack and once on a clean deployment (below). They cover the full user journey, security (HttpOnly cookies, XSS-safe rendering, cross-user isolation, open-redirect safety, transparent token refresh), axe WCAG 2.1 A/AA scans of every page and keyboard navigation, and the 500-node graph render.
+- **Clean-checkout deployment:** a fresh `git clone` of the branch, with only `.env.example` copied to `.env` and a generated secret, built from cold in 3m46s; `scripts/verify-deployment.sh` passed every check; the missing-`.env` error names the fix. Logs from that run (1,881 lines) contained no JWT secret, tokens, passwords or ERROR-level lines.
+- **Performance on real PostgreSQL** (`scripts/measure-search.sh`, 10,000 notes, 100 requests each, through Traefik): search p95 27 to 59 ms (target 500 ms); graph p95 95 ms for the capped 500-node response. Browser render of a 500-node graph: 0.64 to 1.7 s across runs (target 2 s), best of three loads 0.64 to 0.85 s.
+- **Backup and restore:** a custom-format `pg_dump` restored into a scratch database with identical row counts.
+- **Defects found by this phase's tests and fixed:** reload after access-token expiry signed the user out; the rate limit throttled `/me`. See the deviations table.
+
 ## Not yet verified
 
-- The two `IntegrityError` to rollback branches in auth (concurrent duplicate registration, concurrent refresh-token reuse) are not exercised: the local test database cannot survive a SQL error. The pre-checks in front of them are tested.
-- Search performance: p95 about 50 ms over 10,000 notes on PGlite (target 500 ms). Re-measure on real PostgreSQL.
-
+- The two `IntegrityError` to rollback branches in auth (concurrent duplicate registration, concurrent refresh-token reuse) are not exercised by any test. The pre-checks in front of them are tested.
+- Performance was measured on one developer machine with a local Docker Postgres. The 2 s graph target is unconfirmed on other hardware, and the 1.7 s worst case was close to it; a low-end device may exceed it.
+- Scaling `link-worker` or the API services beyond one instance each; concurrent writers to the same note.
+- TLS: Traefik has no certificate configuration, so HTTPS and `Secure` cookies behind a real certificate were not tested.
+- End-to-end tests run in Chromium only, and are not part of CI.
 ## Known gaps
 
 - Suggestions are only created in response to note events. Notes that existed before the worker started, or whose events were lost to stream trimming, get none until they are next edited; there is no backfill job.
@@ -113,5 +130,7 @@ Checked 2026-10-17 on Docker Desktop (Engine 29.8.1) with `docker compose build 
 - Expired rows in `revoked_tokens` are never purged.
 - Password reset, account recovery, and account deletion are undefined (open question in `requirements.md`).
 - The outbox publisher must run as a single instance to preserve ordering.
-- `GET /api/auth/verify?token=` puts a credential in a URL; keep it internal and make sure request logging (IMPL-26) scrubs query strings.
-- Structured JSON logging, correlation IDs, and the remaining health/readiness work are Phase 4 (IMPL-25, IMPL-26). The basic `/health` and `/ready` endpoints already exist.
+- `GET /api/auth/verify?token=` puts a credential in a URL; keep it internal. Request logs record the path only, never the query string, so it is not logged by this application (a proxy in front may log it).
+- Traefik has no TLS certificate configuration, and mounts the Docker socket read-only (see [deployment.md](deployment.md)).
+- No CI job runs the Playwright suite or the performance script.
+- The graph's force layout is drawn on a canvas; the accessible list is the text alternative, but screen-reader users cannot explore the layout itself.
