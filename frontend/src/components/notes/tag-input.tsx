@@ -1,5 +1,6 @@
 "use client";
 
+import { X } from "lucide-react";
 import { useId, useState, type KeyboardEvent } from "react";
 
 import { Input, Label } from "@/components/ui/field";
@@ -43,37 +44,45 @@ export function TagInput({
   }
 
   const shownError = localError ?? error;
+  const hintId = `${id}-hint`;
+
   return (
     <div>
       <Label htmlFor={`${id}-input`}>Tags</Label>
-      {value.length > 0 ? (
+      {value.length > 0 && (
         <ul aria-label="Selected tags" className="mb-2 flex flex-wrap gap-2">
           {value.map((tag) => (
-            <li key={tag} className="flex items-center gap-1 rounded-full bg-muted py-0.5 pl-3 pr-1 text-sm">
+            <li
+              key={tag}
+              className="inline-flex items-center gap-1.5 rounded-md border border-accent-border bg-accent-soft px-2.5 py-1 font-mono text-sm text-accent"
+            >
               {tag}
               <button
                 type="button"
                 aria-label={`Remove tag ${tag}`}
-                className="rounded-full px-2 hover:bg-border"
+                className="rounded hover:bg-accent hover:text-white"
                 onClick={() => onChange(value.filter((t) => t !== tag))}
               >
-                ×
+                <X className="h-3 w-3" strokeWidth={2} />
               </button>
             </li>
           ))}
         </ul>
-      ) : null}
+      )}
       <Input
         id={`${id}-input`}
         list={`${id}-options`}
         value={draft}
-        placeholder="Type a tag, press Enter"
+        placeholder="Type a tag..."
         aria-invalid={Boolean(shownError)}
-        aria-describedby={shownError ? `${id}-error` : undefined}
+        aria-describedby={[shownError ? `${id}-error` : null, hintId].filter(Boolean).join(" ") || undefined}
         onChange={(event) => setDraft(event.target.value)}
         onKeyDown={onKeyDown}
         onBlur={commit}
       />
+      <p id={hintId} className="mt-1.5 text-xs text-text-muted">
+        Press Enter or comma to add
+      </p>
       <datalist id={`${id}-options`}>
         {suggestions
           .filter((name) => !value.includes(name))
@@ -81,11 +90,11 @@ export function TagInput({
             <option key={name} value={name} />
           ))}
       </datalist>
-      {shownError ? (
-        <p id={`${id}-error`} className="mt-1 text-sm text-danger">
+      {shownError && (
+        <p id={`${id}-error`} className="mt-1.5 text-sm text-danger">
           {shownError}
         </p>
-      ) : null}
+      )}
     </div>
   );
 }
