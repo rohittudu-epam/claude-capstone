@@ -104,7 +104,7 @@ export function SuggestionsList() {
       {/* Main Content */}
       <div className="flex flex-1 flex-col overflow-hidden">
         <PageHeader
-          title="Suggestions"
+          title={`Link suggestions (${total})`}
           badge={`${total} pending`}
           description="Review and approve suggested links between related notes"
         />
@@ -138,7 +138,7 @@ export function SuggestionsList() {
             </div>
           )}
 
-          <div className="space-y-4">
+          <div role="list" aria-label="Link suggestions" className="space-y-4">
             {items.map((suggestion) => {
               const { source_note: a, target_note: b } = suggestion;
               const working = busy[suggestion.id];
@@ -147,6 +147,7 @@ export function SuggestionsList() {
               return (
                 <article
                   key={suggestion.id}
+                  role="listitem"
                   className="rounded-xl border border-border-subtle bg-bg-surface p-6 transition-all duration-150"
                 >
                   {/* Note Cards Side by Side */}
@@ -165,7 +166,7 @@ export function SuggestionsList() {
                         <ArrowRight className="h-5 w-5 text-accent" strokeWidth={2} />
                       </div>
                       <Badge variant="accent" className="text-xs font-semibold">
-                        {matchPercent}%
+                        {matchPercent}% match
                       </Badge>
                     </div>
 

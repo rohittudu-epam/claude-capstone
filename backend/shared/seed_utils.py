@@ -4,18 +4,15 @@ This module provides idempotent seeding functions that can be used both from
 the CLI script and from the Docker compose seed service.
 """
 
-import os
-import sys
-from datetime import datetime, timedelta, timezone
-from pathlib import Path
+from datetime import UTC, datetime, timedelta
 from typing import Any
 from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from shared.security import hash_password
 from shared.models import AcceptedLink, Note, Suggestion, Tag, User
+from shared.security import hash_password
 
 # Sample notes with realistic content across multiple topic clusters
 SAMPLE_NOTES = [
@@ -1138,15 +1135,13 @@ def seed_notes(session: Session, user: User) -> dict[str, UUID]:
     note_ids = {}
     created_count = 0
     skipped_count = 0
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     for note_data in SAMPLE_NOTES:
         title = note_data["title"]
 
         # Check if note already exists
-        existing = session.scalars(
-            select(Note).where(Note.owner_id == user.id, Note.title == title)
-        ).first()
+        existing = session.scalars(select(Note).where(Note.owner_id == user.id, Note.title == title)).first()
 
         if existing:
             note_ids[title] = existing.id
@@ -1170,9 +1165,7 @@ def seed_notes(session: Session, user: User) -> dict[str, UUID]:
 
         # Create/get tags
         for tag_name in note_data["tags"]:
-            tag = session.scalars(
-                select(Tag).where(Tag.owner_id == user.id, Tag.name == tag_name)
-            ).first()
+            tag = session.scalars(select(Tag).where(Tag.owner_id == user.id, Tag.name == tag_name)).first()
             if not tag:
                 tag = Tag(owner_id=user.id, name=tag_name)
                 session.add(tag)
@@ -1261,8 +1254,7 @@ def seed_rejected_suggestion(session: Session, user: User, note_ids: dict[str, U
         return 0
 
     # Create a rejected suggestion (requires similarity_score, explanation, and updated_at fields)
-    from datetime import timezone
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     rejection = Suggestion(
         owner_id=user.id,
@@ -1319,10 +1311,10 @@ def run_seed(
         rejected = seed_rejected_suggestion(session, user, note_ids)
         summary["rejected_created"] = rejected
 
-        print(f"\n✅ Seeding complete!")
+        print("\n✅ Seeding complete!")
         print(f"   Total notes: {len(note_ids)}")
         print(f"   New links: {links_created}")
-        print(f"   Login credentials:")
+        print("   Login credentials:")
         print(f"     Email: {email}")
         print(f"     Password: {password}")
         print()

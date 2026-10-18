@@ -43,11 +43,14 @@ export function AppShell({ children, userEmail }: AppShellProps) {
         <Link
           href="/notes"
           className="mb-6 flex h-9 w-9 items-center justify-center text-accent transition-opacity hover:opacity-80"
-          aria-label="LinkNote home"
+          aria-label="LinkNote, go to notes"
           title="LinkNote"
         >
           <Logo className="h-6 w-6" />
+          <span className="sr-only" aria-hidden="true">LinkNote, go to notes</span>
         </Link>
+
+        <Link href="/notes/new" className="sr-only">+ New note</Link>
 
         <nav aria-label="Main navigation" className="flex flex-1 flex-col gap-1">
           {NAV_ITEMS.map((item) => {
@@ -80,9 +83,10 @@ export function AppShell({ children, userEmail }: AppShellProps) {
             onClick={signOut}
             className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-soft text-accent text-xs font-mono font-semibold transition-opacity hover:opacity-80"
             title={`Signed in as ${userEmail}`}
-            aria-label="User menu"
+            aria-label="Sign out"
           >
-            {userEmail[0]?.toUpperCase() ?? "?"}
+            <span aria-hidden="true">{userEmail[0]?.toUpperCase() ?? "?"}</span>
+            <span className="sr-only">{userEmail}</span>
           </button>
         </div>
       </aside>
@@ -94,7 +98,8 @@ export function AppShell({ children, userEmail }: AppShellProps) {
 
       {/* Bottom Tab Bar - Visible on mobile only */}
       <nav
-        aria-label="Main navigation"
+        aria-label="Mobile main navigation"
+        aria-hidden="true"
         className="fixed bottom-0 left-0 right-0 z-30 flex items-center justify-around border-t border-border-subtle bg-bg-surface pb-safe sm:hidden"
       >
         {NAV_ITEMS.map((item) => {

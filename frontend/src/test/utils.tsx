@@ -1,5 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render } from "@testing-library/react";
+
+import { ThemeProvider } from "@/components/ui/theme-provider";
 import type { ReactElement } from "react";
 import { vi } from "vitest";
 
@@ -43,5 +45,12 @@ export function mockFetch(routes: Record<string, Handler>) {
 
 export function renderWithClient(ui: ReactElement) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: 0 } } });
-  return { client, ...render(<QueryClientProvider client={client}>{ui}</QueryClientProvider>) };
+  return {
+    client,
+    ...render(
+      <ThemeProvider>
+        <QueryClientProvider client={client}>{ui}</QueryClientProvider>
+      </ThemeProvider>,
+    ),
+  };
 }

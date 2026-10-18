@@ -41,7 +41,7 @@ export function Button({ className, variant, size, asChild = false, type, loadin
       {loading ? (
         <>
           <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-          {children}
+          {typeof children === "string" ? `${children === "Sign in" ? "Signing in" : children}…` : children}
         </>
       ) : (
         children

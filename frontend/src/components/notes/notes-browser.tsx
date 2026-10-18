@@ -77,6 +77,11 @@ export function NotesBrowser() {
         {tags.data && tags.data.length > 0 && (
           <SidebarSection>
             <TagFilter tags={tags.data} selected={selectedTags} onChange={changeTags} />
+            {(selectedTags.length > 0 || searching) && (
+              <Button variant="ghost" size="sm" onClick={() => { setSelectedTags([]); setText(""); setOffset(0); }}>
+                Clear filters
+              </Button>
+            )}
           </SidebarSection>
         )}
 
@@ -136,29 +141,31 @@ export function NotesBrowser() {
               )
             ) : (
               <div className="space-y-4">
-                <div className="grid gap-4 sm:grid-cols-2">
+                  <ul role="list" aria-label="Notes" className="grid gap-4 sm:grid-cols-2">
                   {notes.data.items.map((note) => (
-                    <Link
-                      key={note.id}
-                      href={`/notes/${note.id}`}
-                      className="group rounded-xl border border-border-subtle bg-bg-surface p-4 transition-all duration-150 hover:border-border-strong hover:shadow-md"
-                    >
-                      <h3 className="font-mono text-base font-semibold text-text-primary group-hover:text-accent transition-colors">
-                        {note.title}
-                      </h3>
-                      <div className="mt-2 flex flex-wrap items-center gap-2">
-                        {note.tags.map((tag) => (
-                          <Badge key={tag} className="font-mono text-xs">
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
-                      <time dateTime={note.updated_at} className="mt-3 block text-xs text-text-muted">
-                        Updated {formatDate(note.updated_at)}
-                      </time>
-                    </Link>
+                    <li key={note.id}>
+                      <Link
+                        aria-label={note.title}
+                        href={`/notes/${note.id}`}
+                        className="group block rounded-xl border border-border-subtle bg-bg-surface p-4 transition-all duration-150 hover:border-border-strong hover:shadow-md"
+                      >
+                        <h3 className="font-mono text-base font-semibold text-text-primary group-hover:text-accent transition-colors">
+                          {note.title}
+                        </h3>
+                        <div className="mt-2 flex flex-wrap items-center gap-2">
+                          {note.tags.map((tag) => (
+                            <Badge key={tag} className="font-mono text-xs">
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+                        <time dateTime={note.updated_at} className="mt-3 block text-xs text-text-muted">
+                          Updated {formatDate(note.updated_at)}
+                        </time>
+                      </Link>
+                    </li>
                   ))}
-                </div>
+              </ul>
 
                 {total > PAGE_SIZE && (
                   <nav aria-label="Pagination" className="flex items-center justify-between pt-4">
