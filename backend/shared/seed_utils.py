@@ -14,8 +14,8 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from shared.auth import hash_password
-from shared.models import AcceptedLink, Note, RejectedSuggestion, Tag, User
+from shared.security import hash_password
+from shared.models import AcceptedLink, Note, Suggestion, Tag, User
 
 # Sample notes with realistic content across multiple topic clusters
 SAMPLE_NOTES = [
@@ -1250,19 +1250,30 @@ def seed_rejected_suggestion(session: Session, user: User, note_ids: dict[str, U
 
     # Check if already exists
     existing = session.scalars(
-        select(RejectedSuggestion).where(
-            RejectedSuggestion.source_note_id == source_id,
-            RejectedSuggestion.target_note_id == target_id,
+        select(Suggestion).where(
+            Suggestion.source_note_id == source_id,
+            Suggestion.target_note_id == target_id,
+            Suggestion.status == "rejected",
         )
     ).first()
 
     if existing:
         return 0
 
-    rejection = RejectedSuggestion(
+    # Create a rejected suggestion (requires similarity_score, explanation, and updated_at fields)
+    from datetime import timezone
+    now = datetime.now(timezone.utc)
+
+    rejection = Suggestion(
         owner_id=user.id,
         source_note_id=source_id,
         target_note_id=target_id,
+        similarity_score=0.15,  # Below threshold, which is why it might be rejected
+        explanation="Low semantic similarity between notes on different topics",
+        status="rejected",
+        source_updated_at=now,
+        target_updated_at=now,
+        rejected_at=now,
     )
     session.add(rejection)
     session.commit()

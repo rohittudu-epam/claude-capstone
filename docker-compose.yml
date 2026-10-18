@@ -111,9 +111,10 @@ services:
       args:
         SERVICE: auth-service
     container_name: linknote-seed
-    command: ["python", "-m", "scripts.seed"]
+    command: ["python", "scripts/seed.py"]
     environment:
       <<: *backend-env
+      PYTHONPATH: /app
       SEED_ON_START: ${SEED_ON_START:-true}
       SEED_DEMO_EMAIL: ${SEED_DEMO_EMAIL:-demo@linknote.local}
       SEED_DEMO_PASSWORD: ${SEED_DEMO_PASSWORD:-demo123456}
@@ -125,8 +126,6 @@ services:
     restart: "no"
     networks:
       - backend
-    volumes:
-      - ./scripts:/app/scripts:ro
 
   auth-service:
     build:
