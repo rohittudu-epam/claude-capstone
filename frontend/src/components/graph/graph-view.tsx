@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
-import { List, Network, ZoomIn, ZoomOut } from "lucide-react";
+import { List, Network } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -10,7 +10,6 @@ import { useMemo, useState } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Sidebar, SidebarHeader, SidebarSection, SidebarSectionLabel, SidebarHintBar } from "@/components/layout/sidebar";
 import { TagFilter } from "@/components/notes/tag-filter";
-import { Button } from "@/components/ui/button";
 import { KeyCap } from "@/components/ui/key-cap";
 import { EmptyState, ErrorNotice, Loading, describeError } from "@/components/ui/feedback";
 import { api } from "@/lib/api";

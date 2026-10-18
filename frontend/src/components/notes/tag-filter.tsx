@@ -1,7 +1,6 @@
 "use client";
 
 import { X } from "lucide-react";
-import { cn } from "@/lib/utils";
 import type { Tag } from "@/lib/types";
 
 /** Toggle chips for filtering by tags. Selecting several narrows results to notes that have all of them. */

@@ -1,6 +1,6 @@
 "use client";
 
-import { FileText, GitFork, Network, Settings, User } from "lucide-react";
+import { FileText, GitFork, Network } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
@@ -8,7 +8,6 @@ import type { ReactNode } from "react";
 
 import { Logo } from "@/components/ui/logo";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 

@@ -16,7 +16,7 @@ import { EmptyState, ErrorNotice, Loading, describeError } from "@/components/ui
 import { api } from "@/lib/api";
 import { useDebouncedValue } from "@/lib/hooks";
 import type { NoteSummary, Page } from "@/lib/types";
-import { formatDate, cn } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
 
 type NoteRow = Pick<NoteSummary, "id" | "title" | "tags" | "updated_at">;
 
