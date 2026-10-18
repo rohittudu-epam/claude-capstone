@@ -63,21 +63,27 @@ export function RegisterForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} noValidate className="space-y-4" aria-labelledby="register-title">
-      <h1 id="register-title" className="text-xl font-semibold">
-        Create your account
-      </h1>
-      {formError ? (
-        <p role="alert" className="rounded-md border border-danger p-3 text-sm text-danger">
+    <form onSubmit={onSubmit} noValidate className="space-y-5" aria-labelledby="register-title">
+      <div className="text-center">
+        <h1 id="register-title" className="text-xl font-semibold text-text-primary">
+          Create your account
+        </h1>
+        <p className="mt-1 text-sm text-text-secondary">Start building your knowledge graph</p>
+      </div>
+
+      {formError && (
+        <div role="alert" className="rounded-lg border border-danger/30 bg-danger/10 p-3 text-sm text-danger">
           {formError}
-        </p>
-      ) : null}
+        </div>
+      )}
+
       <Field id="email" label="Email" error={errors.email}>
         {(props) => (
           <Input {...props} type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
         )}
       </Field>
-      <Field id="password" label="Password" error={errors.password} hint={`At least ${MIN_PASSWORD_LENGTH} characters.`}>
+
+      <Field id="password" label="Password" error={errors.password} hint={`At least ${MIN_PASSWORD_LENGTH} characters`}>
         {(props) => (
           <Input
             {...props}
@@ -88,6 +94,7 @@ export function RegisterForm() {
           />
         )}
       </Field>
+
       <Field id="confirm" label="Confirm password" error={errors.confirm}>
         {(props) => (
           <Input
@@ -99,12 +106,14 @@ export function RegisterForm() {
           />
         )}
       </Field>
-      <Button type="submit" className="w-full" disabled={submitting}>
-        {submitting ? "Creating account…" : "Create account"}
+
+      <Button type="submit" className="w-full" loading={submitting}>
+        Create account
       </Button>
-      <p className="text-center text-sm text-ink-soft">
+
+      <p className="text-center text-sm text-text-secondary">
         Already registered?{" "}
-        <Link className="text-brand underline" href="/login">
+        <Link className="text-accent underline hover:opacity-80" href="/login">
           Sign in
         </Link>
       </p>
