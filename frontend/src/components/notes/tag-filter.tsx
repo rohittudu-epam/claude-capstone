@@ -1,7 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { X } from "lucide-react";
 import type { Tag } from "@/lib/types";
 
 /** Toggle chips for filtering by tags. Selecting several narrows results to notes that have all of them. */
@@ -20,31 +19,42 @@ export function TagFilter({
     onChange(selected.includes(name) ? selected.filter((t) => t !== name) : [...selected, name]);
   }
 
+  const selectedTags = tags.filter((tag) => selected.includes(tag.name));
+  const unselectedTags = tags.filter((tag) => !selected.includes(tag.name));
+
   return (
-    <div role="group" aria-label="Filter by tags" className="flex flex-wrap items-center gap-2">
-      {tags.map((tag) => {
-        const active = selected.includes(tag.name);
-        return (
-          <button
-            key={tag.id}
-            type="button"
-            aria-pressed={active}
-            onClick={() => toggle(tag.name)}
-            className={cn(
-              "rounded-full border px-3 py-1 text-sm",
-              active ? "border-brand bg-brand text-brand-foreground" : "border-border bg-surface hover:bg-muted",
-            )}
-          >
-            {active ? <span aria-hidden="true">✓ </span> : null}
-            {tag.name} <span className="opacity-70">({tag.note_count})</span>
-          </button>
-        );
-      })}
-      {selected.length > 0 ? (
-        <Button variant="ghost" size="sm" onClick={() => onChange([])}>
-          Clear filters
-        </Button>
-      ) : null}
+    <div role="group" aria-label="Filter by tags" className="space-y-2">
+      {selectedTags.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {selectedTags.map((tag) => (
+            <button
+              key={tag.id}
+              type="button"
+              onClick={() => toggle(tag.name)}
+              className="inline-flex items-center gap-1.5 rounded-md border border-accent-border bg-accent-soft px-2.5 py-1 text-xs font-mono font-medium text-accent transition-all duration-150 hover:bg-accent hover:text-white"
+            >
+              {tag.name}
+              <X className="h-3 w-3" strokeWidth={2} />
+            </button>
+          ))}
+        </div>
+      )}
+
+      {unselectedTags.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {unselectedTags.map((tag) => (
+            <button
+              key={tag.id}
+              type="button"
+              onClick={() => toggle(tag.name)}
+              className="inline-flex items-center gap-1.5 rounded-md border border-border-subtle bg-bg-elevated px-2.5 py-1 text-xs font-mono text-text-secondary transition-all duration-150 hover:border-border-strong hover:bg-bg-hover hover:text-text-primary"
+            >
+              {tag.name}
+              <span className="opacity-70">({tag.note_count})</span>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

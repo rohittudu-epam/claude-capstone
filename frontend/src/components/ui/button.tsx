@@ -5,18 +5,19 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center gap-2 rounded-lg text-sm font-medium transition-all duration-150 ease-out disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
-        primary: "bg-brand text-brand-foreground hover:opacity-90",
-        secondary: "border border-border bg-surface text-ink hover:bg-muted",
-        ghost: "text-ink hover:bg-muted",
-        danger: "bg-danger text-brand-foreground hover:opacity-90",
+        primary: "bg-accent text-white hover:bg-accent-hover focus-visible:accent-glow",
+        secondary: "border border-border-strong bg-bg-surface text-text-primary hover:bg-bg-hover",
+        ghost: "text-text-primary hover:bg-bg-hover",
+        danger: "bg-danger text-white hover:opacity-90",
       },
       size: {
-        sm: "h-8 px-3",
-        md: "h-10 px-4",
+        sm: "h-8 px-3 text-sm",
+        md: "h-10 px-4 text-sm",
+        lg: "h-12 px-6 text-base",
       },
     },
     defaultVariants: { variant: "primary", size: "md" },
@@ -25,11 +26,26 @@ const buttonVariants = cva(
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
   asChild?: boolean;
+  loading?: boolean;
 }
 
-export function Button({ className, variant, size, asChild = false, type, ...props }: ButtonProps) {
+export function Button({ className, variant, size, asChild = false, type, loading, children, disabled, ...props }: ButtonProps) {
   const Comp = asChild ? Slot : "button";
   return (
-    <Comp className={cn(buttonVariants({ variant, size }), className)} type={asChild ? undefined : (type ?? "button")} {...props} />
+    <Comp
+      className={cn(buttonVariants({ variant, size }), className)}
+      type={asChild ? undefined : (type ?? "button")}
+      disabled={disabled || loading}
+      {...props}
+    >
+      {loading ? (
+        <>
+          <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+          {children}
+        </>
+      ) : (
+        children
+      )}
+    </Comp>
   );
 }

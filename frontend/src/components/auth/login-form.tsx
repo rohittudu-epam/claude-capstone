@@ -50,25 +50,32 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} noValidate className="space-y-4" aria-labelledby="login-title">
-      <h1 id="login-title" className="text-xl font-semibold">
-        Sign in
-      </h1>
-      {params.get("expired") ? (
-        <p role="status" className="rounded-md bg-muted p-3 text-sm">
+    <form onSubmit={onSubmit} noValidate className="space-y-5" aria-labelledby="login-title">
+      <div className="text-center">
+        <h1 id="login-title" className="text-xl font-semibold text-text-primary">
+          Sign in
+        </h1>
+        <p className="mt-1 text-sm text-text-secondary">Welcome back to your knowledge graph</p>
+      </div>
+
+      {params.get("expired") && (
+        <div role="status" className="rounded-lg border border-warning/30 bg-warning/10 p-3 text-sm text-warning">
           Your session expired. Please sign in again.
-        </p>
-      ) : null}
-      {formError ? (
-        <p role="alert" className="rounded-md border border-danger p-3 text-sm text-danger">
+        </div>
+      )}
+
+      {formError && (
+        <div role="alert" className="rounded-lg border border-danger/30 bg-danger/10 p-3 text-sm text-danger">
           {formError}
-        </p>
-      ) : null}
+        </div>
+      )}
+
       <Field id="email" label="Email" error={errors.email}>
         {(props) => (
           <Input {...props} type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
         )}
       </Field>
+
       <Field id="password" label="Password" error={errors.password}>
         {(props) => (
           <Input
@@ -80,12 +87,14 @@ export function LoginForm() {
           />
         )}
       </Field>
-      <Button type="submit" className="w-full" disabled={submitting}>
-        {submitting ? "Signing in…" : "Sign in"}
+
+      <Button type="submit" className="w-full" loading={submitting}>
+        Sign in
       </Button>
-      <p className="text-center text-sm text-ink-soft">
+
+      <p className="text-center text-sm text-text-secondary">
         No account yet?{" "}
-        <Link className="text-brand underline" href="/register">
+        <Link className="text-accent underline hover:opacity-80" href="/register">
           Create one
         </Link>
       </p>
