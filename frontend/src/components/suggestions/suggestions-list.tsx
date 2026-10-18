@@ -1,10 +1,15 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Check, X, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useRef, useState } from "react";
 
+import { PageHeader } from "@/components/layout/page-header";
+import { Sidebar, SidebarHeader, SidebarSection, SidebarSectionLabel, SidebarHintBar } from "@/components/layout/sidebar";
 import { Button } from "@/components/ui/button";
+import { KeyCap } from "@/components/ui/key-cap";
+import { Badge } from "@/components/ui/badge";
 import { EmptyState, ErrorNotice, Loading, describeError } from "@/components/ui/feedback";
 import { ApiError, api } from "@/lib/api";
 import type { Page, Suggestion } from "@/lib/types";
@@ -62,76 +67,159 @@ export function SuggestionsList() {
   }
 
   const items = suggestions.data?.items ?? [];
+  const total = suggestions.data?.total ?? 0;
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">
-        Link suggestions{suggestions.data ? ` (${suggestions.data.total})` : ""}
-      </h1>
-      <p className="text-sm text-ink-soft">
-        Notes that share keywords. Accept to link them in your graph; reject to dismiss. Nothing is linked until you decide.
-      </p>
-      <div aria-live="polite">
-        {notice ? <p role="status" className="rounded-md bg-surface p-3 text-sm">{notice}</p> : null}
-      </div>
+    <>
+      {/* Sidebar */}
+      <Sidebar>
+        <SidebarHeader>
+          <h2 className="font-mono text-sm font-semibold text-text-primary">Link Suggestions</h2>
+        </SidebarHeader>
 
-      {suggestions.isPending ? <Loading>Loading suggestions…</Loading> : null}
-      {suggestions.isError ? (
-        <ErrorNotice message={describeError(suggestions.error)} onRetry={() => suggestions.refetch()} />
-      ) : null}
-      {suggestions.data && items.length === 0 ? (
-        <EmptyState title="No suggestions to review">
-          Suggestions appear a moment after you save notes that mention the same things.
-        </EmptyState>
-      ) : null}
+        <SidebarSection>
+          <SidebarSectionLabel count={total}>Pending</SidebarSectionLabel>
+          <div className="space-y-2 text-sm">
+            <p className="text-text-secondary">
+              Notes that share keywords. Nothing is linked until you decide.
+            </p>
+          </div>
+        </SidebarSection>
 
-      <ul className="space-y-3">
-        {items.map((suggestion) => {
-          const { source_note: a, target_note: b } = suggestion;
-          const working = busy[suggestion.id];
-          return (
-            <li key={suggestion.id} className="rounded-md border border-border bg-surface p-4">
-              <p className="font-medium">
-                <Link className="text-brand hover:underline" href={`/notes/${a.id}`}>
-                  {a.title}
-                </Link>
-                <span aria-hidden="true"> ↔ </span>
-                <span className="sr-only"> is related to </span>
-                <Link className="text-brand hover:underline" href={`/notes/${b.id}`}>
-                  {b.title}
-                </Link>
-              </p>
-              <p className="mt-1 text-sm text-ink-soft">
-                {Math.round(suggestion.similarity_score * 100)}% match · {suggestion.explanation}
-              </p>
-              {rowErrors[suggestion.id] ? (
-                <p role="alert" className="mt-2 text-sm text-danger">
-                  {rowErrors[suggestion.id]}
-                </p>
-              ) : null}
-              <div className="mt-3 flex gap-2">
-                <Button
-                  size="sm"
-                  disabled={Boolean(working)}
-                  aria-label={`Accept link between ${a.title} and ${b.title}`}
-                  onClick={() => act(suggestion, "accept")}
-                >
-                  {working === "accept" ? "Linking…" : "Accept"}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  disabled={Boolean(working)}
-                  aria-label={`Reject link between ${a.title} and ${b.title}`}
-                  onClick={() => act(suggestion, "reject")}
-                >
-                  {working === "reject" ? "Dismissing…" : "Reject"}
-                </Button>
+        <div className="flex-1" />
+        <SidebarHintBar>
+          <span>
+            <KeyCap>↑</KeyCap>
+            <KeyCap>↓</KeyCap> navigate
+          </span>
+          <span>
+            <KeyCap>A</KeyCap> accept
+          </span>
+          <span>
+            <KeyCap>R</KeyCap> reject
+          </span>
+        </SidebarHintBar>
+      </Sidebar>
+
+      {/* Main Content */}
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <PageHeader
+          title="Suggestions"
+          badge={`${total} pending`}
+          description="Review and approve suggested links between related notes"
+        />
+
+        <div className="flex-1 overflow-y-auto p-6">
+          <div aria-live="polite" className="mb-4">
+            {notice && (
+              <div role="status" className="rounded-lg border border-success/30 bg-success/10 p-3 text-sm text-success">
+                {notice}
               </div>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
+            )}
+          </div>
+
+          {suggestions.isPending && (
+            <div className="flex h-64 items-center justify-center">
+              <Loading>Loading suggestions…</Loading>
+            </div>
+          )}
+
+          {suggestions.isError && (
+            <div className="flex h-64 items-center justify-center">
+              <ErrorNotice message={describeError(suggestions.error)} onRetry={() => suggestions.refetch()} />
+            </div>
+          )}
+
+          {suggestions.data && items.length === 0 && (
+            <div className="flex h-64 items-center justify-center">
+              <EmptyState title="No suggestions to review">
+                Suggestions appear after you save notes that mention the same things.
+              </EmptyState>
+            </div>
+          )}
+
+          <div className="space-y-4">
+            {items.map((suggestion) => {
+              const { source_note: a, target_note: b } = suggestion;
+              const working = busy[suggestion.id];
+              const matchPercent = Math.round(suggestion.similarity_score * 100);
+
+              return (
+                <article
+                  key={suggestion.id}
+                  className="rounded-xl border border-border-subtle bg-bg-surface p-6 transition-all duration-150"
+                >
+                  {/* Note Cards Side by Side */}
+                  <div className="flex items-center gap-4">
+                    {/* Source Note */}
+                    <Link
+                      href={`/notes/${a.id}`}
+                      className="flex-1 rounded-lg border border-border-strong bg-bg-elevated p-4 transition-all duration-150 hover:border-accent hover:shadow-md"
+                    >
+                      <h3 className="font-mono text-base font-semibold text-text-primary">{a.title}</h3>
+                    </Link>
+
+                    {/* Connection Indicator */}
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-dashed border-accent-border bg-accent-soft">
+                        <ArrowRight className="h-5 w-5 text-accent" strokeWidth={2} />
+                      </div>
+                      <Badge variant="accent" className="text-xs font-semibold">
+                        {matchPercent}%
+                      </Badge>
+                    </div>
+
+                    {/* Target Note */}
+                    <Link
+                      href={`/notes/${b.id}`}
+                      className="flex-1 rounded-lg border border-border-strong bg-bg-elevated p-4 transition-all duration-150 hover:border-accent hover:shadow-md"
+                    >
+                      <h3 className="font-mono text-base font-semibold text-text-primary">{b.title}</h3>
+                    </Link>
+                  </div>
+
+                  {/* Explanation */}
+                  <p className="mt-4 text-sm text-text-secondary">{suggestion.explanation}</p>
+
+                  {/* Error Display */}
+                  {rowErrors[suggestion.id] && (
+                    <p role="alert" className="mt-3 rounded-lg border border-danger/30 bg-danger/10 p-2 text-sm text-danger">
+                      {rowErrors[suggestion.id]}
+                    </p>
+                  )}
+
+                  {/* Actions */}
+                  <div className="mt-4 flex gap-3">
+                    <Button
+                      size="md"
+                      loading={working === "accept"}
+                      disabled={Boolean(working)}
+                      aria-label={`Accept link between ${a.title} and ${b.title}`}
+                      onClick={() => act(suggestion, "accept")}
+                      className="flex-1"
+                    >
+                      <Check className="h-4 w-4" strokeWidth={2} />
+                      {working === "accept" ? "Linking…" : "Accept"}
+                    </Button>
+                    <Button
+                      size="md"
+                      variant="ghost"
+                      loading={working === "reject"}
+                      disabled={Boolean(working)}
+                      aria-label={`Reject link between ${a.title} and ${b.title}`}
+                      onClick={() => act(suggestion, "reject")}
+                      className="flex-1"
+                    >
+                      <X className="h-4 w-4" strokeWidth={2} />
+                      {working === "reject" ? "Dismissing…" : "Reject"}
+                    </Button>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
