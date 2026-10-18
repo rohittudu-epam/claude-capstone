@@ -26,14 +26,14 @@ You are a **Senior QA / Verification Engineer**. You generate comprehensive test
 ## Inputs
 
 - All source files.
-- `requirements.md` — to derive test cases from acceptance criteria.
-- `architecture.md` — to understand component boundaries for integration tests.
-- `code-review.md` — to verify that review fixes are effective.
+- `docs/requirements.md` — to derive test cases from acceptance criteria.
+- `docs/architecture.md` — to understand component boundaries for integration tests.
+- `docs/code-review.md` — to verify that review fixes are effective.
 
 ## Entry Criteria
 
 - Source files exist and code review stage is complete.
-- `requirements.md` and `architecture.md` exist and are non-empty.
+- `docs/requirements.md` and `docs/architecture.md` exist and are non-empty.
 
 ## Execution Procedure
 
@@ -41,7 +41,7 @@ You are a **Senior QA / Verification Engineer**. You generate comprehensive test
 
 Use the **test-and-verify skill** procedure:
 
-- Read all source files, `requirements.md`, and `architecture.md`.
+- Read all source files, `docs/requirements.md`, and `docs/architecture.md`.
 - For each functional requirement, identify the test cases needed:
   - **Happy path:** Normal successful operation.
   - **Edge cases:** Empty input, missing fields, not-found responses, boundary values.
@@ -66,7 +66,7 @@ For each component/module:
 
 For component interactions:
 
-- Test the data flow between components as described in `architecture.md`.
+- Test the data flow between components as described in `docs/architecture.md`.
 - Test end-to-end scenarios from input to output.
 - Test error propagation across component boundaries.
 
@@ -128,17 +128,17 @@ If the system produces documentation or output files:
 - Check for placeholder text that should have been replaced.
 - Check for formatting correctness.
 
-### 6. Generate verification-report.md
+### 6. Generate docs/verification-report.md
 
-Write `verification-report.md` to the project root:
+Write `docs/verification-report.md` to the project root:
 
 ````markdown
 # Verification Report
 
 ## Metadata
 - **Source code reviewed:** [list of source files]
-- **Requirements reference:** requirements.md
-- **Architecture reference:** architecture.md
+- **Requirements reference:** docs/requirements.md
+- **Architecture reference:** docs/architecture.md
 - **Verifier:** verification-agent
 - **Version:** 1.0
 
@@ -212,14 +212,14 @@ git commit -m "test: add verification suite and report — all tests passing"
 - [ ] All tests pass (0 failures).
 - [ ] Happy path is covered for every functional requirement.
 - [ ] At least 3 edge cases are tested (empty input, missing fields, error conditions).
-- [ ] `verification-report.md` exists with complete test output.
+- [ ] `docs/verification-report.md` exists with complete test output.
 - [ ] Content quality check is included.
 - [ ] All files committed to git.
 
 ## Output
 
 - Test files in `tests/` directory.
-- `verification-report.md` — committed to repository root.
+- `docs/verification-report.md` — committed to repository root.
 - Source fixes (if bugs were found during testing).
 
 ## Failure Handling

@@ -157,13 +157,13 @@ Key achievements:
 ### Documentation (IMPL-27)
 
 **Added:**
-- `requirements.md` — 15 functional requirements, 9 non-functional requirements, assumptions, out-of-scope items
-- `architecture.md` — System architecture with 10 components, data flows, technology choices, security architecture (includes design review remediations)
-- `design-review.md` — 5 findings (DR-1 to DR-5) with remediations approved
-- `impl-plan.md` — 28 implementation tasks with dependencies, acceptance criteria, and execution order
-- `code-review.md` — Review of 101 files, 9 findings (0 Critical, 3 High fixed)
-- `verification-report.md` — Test results, requirements traceability, performance measurements
-- `user-story.md` — 14 user stories defining MVP scope
+- `docs/requirements.md` — 15 functional requirements, 9 non-functional requirements, assumptions, out-of-scope items
+- `docs/architecture.md` — System architecture with 10 components, data flows, technology choices, security architecture (includes design review remediations)
+- `docs/design-review.md` — 5 findings (DR-1 to DR-5) with remediations approved
+- `docs/impl-plan.md` — 28 implementation tasks with dependencies, acceptance criteria, and execution order
+- `docs/code-review.md` — Review of 101 files, 9 findings (0 Critical, 3 High fixed)
+- `docs/verification-report.md` — Test results, requirements traceability, performance measurements
+- `docs/user-story.md` — 14 user stories defining MVP scope
 - `workflow-state.json` — SDLC pipeline execution state
 - `docs/getting-started.md` — Setup and installation guide
 - `docs/deployment.md` — Production deployment procedures
@@ -342,11 +342,11 @@ All deviations improve security, reliability, or functionality without compromis
 
 ## Reviewer Checklist
 
-- [ ] Requirements in `requirements.md` are complete and address all 14 user stories
-- [ ] Architecture in `architecture.md` addresses all requirements with clear component boundaries
-- [ ] Design review in `design-review.md` has no unresolved Critical findings (all 5 remediations implemented)
-- [ ] Implementation plan in `impl-plan.md` covers all 28 tasks with clear acceptance criteria
-- [ ] Code review findings in `code-review.md` show all High issues fixed (C-1, S-1, S-2)
+- [ ] Requirements in `docs/requirements.md` are complete and address all 14 user stories
+- [ ] Architecture in `docs/architecture.md` addresses all requirements with clear component boundaries
+- [ ] Design review in `docs/design-review.md` has no unresolved Critical findings (all 5 remediations implemented)
+- [ ] Implementation plan in `docs/impl-plan.md` covers all 28 tasks with clear acceptance criteria
+- [ ] Code review findings in `docs/code-review.md` show all High issues fixed (C-1, S-1, S-2)
 - [ ] Verification report shows 341/342 tests passing (99.7%) with all FRs verified
 - [ ] No secrets or credentials are committed (`.env` in `.gitignore`, `.env.example` has warnings)
 - [ ] Error handling covers API failures, missing files, and edge cases (comprehensive test coverage)

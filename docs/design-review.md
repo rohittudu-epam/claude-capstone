@@ -6,7 +6,7 @@
 
 The architecture presents a well-structured microservices design that addresses all functional requirements, provides clear component boundaries, and implements appropriate security controls. The design is pragmatic for an MVP, emphasizing simplicity and Docker-based deployment. 
 
-**Review outcome:** 5 findings identified and addressed (0 Critical, 2 High accepted with remediations, 2 Medium accepted, 1 Informational for guidance). All Critical and High findings have been incorporated into remediated `architecture.md`.
+**Review outcome:** 5 findings identified and addressed (0 Critical, 2 High accepted with remediations, 2 Medium accepted, 1 Informational for guidance). All Critical and High findings have been incorporated into remediated `docs/architecture.md`.
 
 ---
 
@@ -21,7 +21,7 @@ The architecture presents a well-structured microservices design that addresses 
   1. **Transactional Outbox Pattern:** Store the event durably in PostgreSQL as part of the same transaction that persists the note. A separate outbox reader publishes events to Redis asynchronously. Guarantees no event is lost.
   2. **Synchronous Publication with Retry:** Make event publication synchronous and critical; fail note creation if Redis is unavailable. User receives error; note is not persisted.
   3. **Async Verification:** Periodically scan notes for "missing" link analysis and reprocess them (simpler but less performant).
-- **Decision:** ACCEPTED — **Implement Transactional Outbox Pattern in Note Service.** Add an `outbox` table to PostgreSQL (`note_id`, `event_type`, `payload`, `created_at`, `published_at`). On note creation/update, insert the event into `outbox` in the same transaction. A background task (e.g., Link Service or separate worker) reads unpublished outbox entries, publishes to Redis, and marks them as published. This guarantees durability and observability. Update architecture.md to document outbox pattern.
+- **Decision:** ACCEPTED — **Implement Transactional Outbox Pattern in Note Service.** Add an `outbox` table to PostgreSQL (`note_id`, `event_type`, `payload`, `created_at`, `published_at`). On note creation/update, insert the event into `outbox` in the same transaction. A background task (e.g., Link Service or separate worker) reads unpublished outbox entries, publishes to Redis, and marks them as published. This guarantees durability and observability. Update docs/architecture.md to document outbox pattern.
 
 ---
 
@@ -34,7 +34,7 @@ The architecture presents a well-structured microservices design that addresses 
   1. Add an optional `/api/auth/verify?token=<token>` endpoint that checks token revocation status (return 401 if revoked).
   2. Require backend services to call this endpoint for security-sensitive operations (e.g., account deletion, password change).
   3. Or: implement distributed token revocation via a cache (Redis) that Auth Service updates on logout, and other services check (eventual consistency, acceptable for MVP).
-- **Decision:** ACCEPTED — **Implement token revocation via Auth Service endpoint.** Auth Service maintains a revocation list (SQL table or Redis cache). On logout, token is added to revocation list. Other services optionally validate tokens against `/api/auth/verify` for sensitive operations. Update architecture.md to clarify token lifecycle and revocation.
+- **Decision:** ACCEPTED — **Implement token revocation via Auth Service endpoint.** Auth Service maintains a revocation list (SQL table or Redis cache). On logout, token is added to revocation list. Other services optionally validate tokens against `/api/auth/verify` for sensitive operations. Update docs/architecture.md to clarify token lifecycle and revocation.
 
 ---
 
@@ -47,7 +47,7 @@ The architecture presents a well-structured microservices design that addresses 
   1. Use database constraints and transactional integrity (foreign keys with ON DELETE CASCADE).
   2. Add integration tests verifying cascade behavior under various failure scenarios.
   3. Consider adding a cleanup verification step during deployment.
-- **Decision:** ACCEPTED — Rely on PostgreSQL transactional integrity with explicit ON DELETE CASCADE constraints. Add integration tests for cascade scenarios. Update architecture.md to document cascade behavior and testing approach.
+- **Decision:** ACCEPTED — Rely on PostgreSQL transactional integrity with explicit ON DELETE CASCADE constraints. Add integration tests for cascade scenarios. Update docs/architecture.md to document cascade behavior and testing approach.
 
 ---
 
@@ -67,7 +67,7 @@ The architecture presents a well-structured microservices design that addresses 
   }
   ```
   Document in Graph API contract.
-- **Decision:** ACCEPTED — Add explicit `is_capped` and `total_nodes` fields to graph API response. Update architecture.md API contract section. Implement in Graph Service during implementation.
+- **Decision:** ACCEPTED — Add explicit `is_capped` and `total_nodes` fields to graph API response. Update docs/architecture.md API contract section. Implement in Graph Service during implementation.
 
 ---
 
@@ -77,7 +77,7 @@ The architecture presents a well-structured microservices design that addresses 
 - **Category:** Maintainability & Scalability
 - **Description:** As the system evolves, event schemas published to Redis Streams may change (e.g., new fields, renamed fields). Link Service consumers must handle multiple schema versions gracefully. The architecture specifies "versioned event contract," but does not define the versioning mechanism.
 - **Recommendation:** Adopt semantic versioning for event schemas. Include a `schema_version` field in event payloads. Link Service consumers implement version-specific handlers or schema migration logic. Document the event versioning policy.
-- **Decision:** ACCEPTED — Document event schema versioning in architecture.md. Recommend including `schema_version: 1` in initial event payloads for future extensibility. Not required for MVP but good practice.
+- **Decision:** ACCEPTED — Document event schema versioning in docs/architecture.md. Recommend including `schema_version: 1` in initial event payloads for future extensibility. Not required for MVP but good practice.
 
 ---
 
@@ -183,7 +183,7 @@ The architecture presents a well-structured microservices design that addresses 
 
 The architecture is **well-designed for the LinkNote MVP scope**. It provides clear component boundaries, security-conscious defaults, and pragmatic technology choices. The two High-severity findings (event durability, token revocation) have been addressed with appropriate design patterns. All functional and non-functional requirements are covered. 
 
-**Approval Status: ✓ APPROVED** with remediations incorporated into updated `architecture.md`.
+**Approval Status: ✓ APPROVED** with remediations incorporated into updated `docs/architecture.md`.
 
 The design is ready to proceed to the implementation planning phase.
 

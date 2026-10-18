@@ -52,7 +52,7 @@ chmod +x .claude/scripts/*.sh
 
 ### 4. Prepare Your User Story
 
-Create a file with your user story, e.g., `user-story.md`:
+Create a file with your user story, e.g., `docs/user-story.md`:
 
 ```markdown
 # User Story
@@ -70,7 +70,7 @@ As a [role], I want [capability] so that [benefit].
 
 In Claude Code, use the SDLC workflow skill:
 
-> "Run the full SDLC pipeline for the user story in user-story.md"
+> "Run the full SDLC pipeline for the user story in docs/user-story.md"
 
 Or reference the orchestrator directly:
 
@@ -80,7 +80,7 @@ Or reference the orchestrator directly:
 
 To run just one stage (e.g., if resuming):
 
-> "Load the requirements agent from .claude/agents/requirements-agent.md and gather requirements from user-story.md"
+> "Load the requirements agent from .claude/agents/requirements-agent.md and gather requirements from docs/user-story.md"
 
 ### Resuming an Interrupted Pipeline
 
@@ -102,16 +102,16 @@ After a complete pipeline run, your repository will contain:
 
 | File | Description |
 |------|-------------|
-| `requirements.md` | Functional and non-functional requirements |
-| `architecture.md` | System architecture with components and technology choices |
-| `design-review.md` | Design review findings and decisions |
-| `impl-plan.md` | Prioritized implementation task list |
+| `docs/requirements.md` | Functional and non-functional requirements |
+| `docs/architecture.md` | System architecture with components and technology choices |
+| `docs/design-review.md` | Design review findings and decisions |
+| `docs/impl-plan.md` | Prioritized implementation task list |
 | `src/` (or similar) | Implementation source code |
 | `tests/` | Unit and integration tests |
-| `code-review.md` | Code review findings across 7 areas |
-| `verification-report.md` | Test results and quality assessment |
-| `pr-description.md` | Complete PR description with all 5 sections |
-| `CHANGELOG.md` | Project changelog |
+| `docs/code-review.md` | Code review findings across 7 areas |
+| `docs/verification-report.md` | Test results and quality assessment |
+| `docs/pr-description.md` | Complete PR description with all 5 sections |
+| `docs/CHANGELOG.md` | Project changelog |
 | `workflow-state.json` | Pipeline execution state |
 
 ## Troubleshooting

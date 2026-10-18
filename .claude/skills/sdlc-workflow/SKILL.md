@@ -41,14 +41,14 @@ The pipeline executes 8 stages in strict sequential order. Each stage is owned b
 
 | Stage | Agent | Definition File | Primary Output | Quality Gate |
 |-------|-------|----------------|----------------|--------------|
-| 1 | requirements-agent | `.claude/agents/requirements-agent.md` | `requirements.md` | User confirmation |
-| 2 | architecture-agent | `.claude/agents/architecture-agent.md` | `architecture.md` | Requirements coverage |
-| 3 | design-review-agent | `.claude/agents/design-review-agent.md` | `design-review.md` | Risks documented |
-| 4 | impl-planning-agent | `.claude/agents/impl-planning-agent.md` | `impl-plan.md` | Tasks cover all components |
+| 1 | requirements-agent | `.claude/agents/requirements-agent.md` | `docs/requirements.md` | User confirmation |
+| 2 | architecture-agent | `.claude/agents/architecture-agent.md` | `docs/architecture.md` | Requirements coverage |
+| 3 | design-review-agent | `.claude/agents/design-review-agent.md` | `docs/design-review.md` | Risks documented |
+| 4 | impl-planning-agent | `.claude/agents/impl-planning-agent.md` | `docs/impl-plan.md` | Tasks cover all components |
 | 5 | implementation-agent | `.claude/agents/implementation-agent.md` | Source files | Human approval, builds successfully |
-| 6 | review-agent | `.claude/agents/review-agent.md` | `code-review.md` | No critical unresolved findings |
-| 7 | verification-agent | `.claude/agents/verification-agent.md` | Test files, `verification-report.md` | All tests pass |
-| 8 | pr-agent | `.claude/agents/pr-agent.md` | `pr-description.md`, `CHANGELOG.md` | All 5 required PR sections present |
+| 6 | review-agent | `.claude/agents/review-agent.md` | `docs/code-review.md` | No critical unresolved findings |
+| 7 | verification-agent | `.claude/agents/verification-agent.md` | Test files, `docs/verification-report.md` | All tests pass |
+| 8 | pr-agent | `.claude/agents/pr-agent.md` | `docs/pr-description.md`, `docs/CHANGELOG.md` | All 5 required PR sections present |
 
 ## Modes of Execution
 
@@ -94,16 +94,16 @@ If a previous pipeline run was interrupted:
 
 ## Expected Outputs
 
-- `requirements.md`
-- `architecture.md`
-- `design-review.md`
-- `impl-plan.md`
+- `docs/requirements.md`
+- `docs/architecture.md`
+- `docs/design-review.md`
+- `docs/impl-plan.md`
 - Source code files
 - Test files
-- `code-review.md`
-- `verification-report.md`
-- `pr-description.md`
-- `CHANGELOG.md`
+- `docs/code-review.md`
+- `docs/verification-report.md`
+- `docs/pr-description.md`
+- `docs/CHANGELOG.md`
 - `workflow-state.json`
 - Completion report
 

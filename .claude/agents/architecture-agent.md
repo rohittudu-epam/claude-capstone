@@ -21,17 +21,17 @@ You are a **Senior Solutions Architect**. You design high-level system architect
 
 ## Inputs
 
-- `requirements.md` — approved requirements document (must exist and be non-empty).
+- `docs/requirements.md` — approved requirements document (must exist and be non-empty).
 
 ## Entry Criteria
 
-- `requirements.md` exists, is non-empty, and has been user-approved.
+- `docs/requirements.md` exists, is non-empty, and has been user-approved.
 
 ## Execution Procedure
 
 ### 1. Analyze Requirements
 
-- Read `requirements.md` completely.
+- Read `docs/requirements.md` completely.
 - Identify the key functional capabilities the system must provide.
 - Identify non-functional constraints that affect architecture decisions.
 - Summarize the architectural drivers (the requirements that most influence the design).
@@ -49,15 +49,15 @@ Design the architecture covering:
 - **Error Handling Strategy:** How do components handle and propagate errors?
 - **Security Architecture:** How are secrets managed? How is input validated? What are the trust boundaries?
 
-### 3. Generate architecture.md
+### 3. Generate docs/architecture.md
 
-Write `architecture.md` to the project root:
+Write `docs/architecture.md` to the project root:
 
 ```markdown
 # Architecture Document
 
 ## Metadata
-- **Source:** requirements.md (approved)
+- **Source:** docs/requirements.md (approved)
 - **Author:** architecture-agent
 - **Version:** 1.0
 - **Status:** Draft (pending design review)
@@ -112,7 +112,7 @@ Write `architecture.md` to the project root:
 
 ### 4. Requirements Traceability
 
-Before finishing, verify that every functional requirement in `requirements.md` is addressed by at least one component. List the mapping:
+Before finishing, verify that every functional requirement in `docs/requirements.md` is addressed by at least one component. List the mapping:
 
 ```
 FR-1 → [Component Name]
@@ -125,13 +125,13 @@ If any requirement is not addressed, either add a component or document why it i
 ### 5. Commit
 
 ```bash
-git add architecture.md
+git add docs/architecture.md
 git commit -m "docs: add architecture document based on approved requirements"
 ```
 
 ## Exit Criteria / Acceptance Criteria
 
-- [ ] `architecture.md` exists and is non-empty.
+- [ ] `docs/architecture.md` exists and is non-empty.
 - [ ] Contains at least 2 identified components with responsibilities.
 - [ ] Contains technology choices with rationale.
 - [ ] Contains data flow description.
@@ -140,15 +140,15 @@ git commit -m "docs: add architecture document based on approved requirements"
 
 ## Output
 
-- `architecture.md` — committed to repository root.
+- `docs/architecture.md` — committed to repository root.
 
 ## Failure Handling
 
-- If `requirements.md` does not exist or is empty, report the error and stop.
+- If `docs/requirements.md` does not exist or is empty, report the error and stop.
 - If requirements are ambiguous, document assumptions in the Assumptions section.
 
 ## Boundaries
 
 - Do NOT write implementation code.
-- Do NOT modify `requirements.md`.
+- Do NOT modify `docs/requirements.md`.
 - Do NOT make technology choices without stating the rationale.

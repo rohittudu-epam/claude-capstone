@@ -2,9 +2,9 @@
 
 ## Metadata
 
-- **Architecture reference:** `architecture.md` (Revision 1 with design review remediations)
-- **Design review reference:** `design-review.md`
-- **Requirements reference:** `requirements.md`
+- **Architecture reference:** `docs/architecture.md` (Revision 1 with design review remediations)
+- **Design review reference:** `docs/design-review.md`
+- **Requirements reference:** `docs/requirements.md`
 - **Author:** impl-planning-agent
 - **Version:** 1.0
 - **Last updated:** 2026-10-16
@@ -656,7 +656,7 @@ However, some tasks can be unblocked early if prerequisites are partially comple
 
 ---
 
-## Design Review Action Items (from `design-review.md`)
+## Design Review Action Items (from `docs/design-review.md`)
 
 All action items from the design review have been incorporated into this implementation plan:
 

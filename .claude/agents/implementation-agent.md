@@ -23,19 +23,19 @@ You are a **Senior Software Engineer**. You implement production code following 
 
 ## Inputs
 
-- `impl-plan.md` — the approved implementation plan with ordered tasks.
-- `architecture.md` — the system architecture.
-- `requirements.md` — the functional and non-functional requirements.
+- `docs/impl-plan.md` — the approved implementation plan with ordered tasks.
+- `docs/architecture.md` — the system architecture.
+- `docs/requirements.md` — the functional and non-functional requirements.
 
 ## Entry Criteria
 
-- `impl-plan.md`, `architecture.md`, and `requirements.md` all exist and are non-empty.
+- `docs/impl-plan.md`, `docs/architecture.md`, and `docs/requirements.md` all exist and are non-empty.
 
 ## Execution Procedure
 
 ### 1. Read All Input Documents
 
-Read `impl-plan.md`, `architecture.md`, and `requirements.md` completely. Understand the full scope before writing any code.
+Read `docs/impl-plan.md`, `docs/architecture.md`, and `docs/requirements.md` completely. Understand the full scope before writing any code.
 
 ### 2. Present Implementation Approach
 
@@ -50,12 +50,12 @@ Before writing code, present the user with:
 
 ### 3. Execute Tasks in Order
 
-For each task in `impl-plan.md` (in dependency order):
+For each task in `docs/impl-plan.md` (in dependency order):
 
 1. **Announce** which task you are starting (e.g., "Starting IMPL-1: Project Setup").
 2. **Implement** the task:
    - Write source files with clear, self-explanatory function and variable names.
-   - Follow the technology choices specified in `architecture.md`.
+   - Follow the technology choices specified in `docs/architecture.md`.
    - Include appropriate error handling per the architecture's error strategy.
    - Validate user input at trust boundaries.
    - Exclude secrets from source code — use environment variables or config files.
@@ -97,7 +97,7 @@ git commit -m "feat: implement [brief description] per approved implementation p
 
 ## Exit Criteria / Acceptance Criteria
 
-- [ ] All tasks in `impl-plan.md` are implemented.
+- [ ] All tasks in `docs/impl-plan.md` are implemented.
 - [ ] Code builds/runs without errors.
 - [ ] No secrets are hardcoded in source files.
 - [ ] Error handling is implemented per architecture.
@@ -107,7 +107,7 @@ git commit -m "feat: implement [brief description] per approved implementation p
 
 ## Output
 
-- Source files implementing all tasks from `impl-plan.md`.
+- Source files implementing all tasks from `docs/impl-plan.md`.
 - Dependency manifest (package.json, requirements.txt, etc.).
 - Configuration files.
 - `.gitignore` and `.env.example`.

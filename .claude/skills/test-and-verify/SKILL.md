@@ -17,7 +17,7 @@ Use this skill when generating and executing tests for the implemented code. Use
 
 ### 1. Derive Test Cases from Requirements
 
-For each functional requirement in `requirements.md`:
+For each functional requirement in `docs/requirements.md`:
 
 - **Happy path test:** Verify the requirement works correctly with valid input.
 - **Edge case tests:**

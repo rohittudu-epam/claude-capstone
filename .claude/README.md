@@ -34,14 +34,14 @@ This directory contains the agent definitions, skill procedures, scripts, and se
 
 | Stage | Agent | Output | Quality Gate |
 |-------|-------|--------|--------------|
-| 1 | requirements-agent | `requirements.md` | User confirmation |
-| 2 | architecture-agent | `architecture.md` | Requirements coverage |
-| 3 | design-review-agent | `design-review.md` | Risks documented |
-| 4 | impl-planning-agent | `impl-plan.md` | Tasks cover all components |
+| 1 | requirements-agent | `docs/requirements.md` | User confirmation |
+| 2 | architecture-agent | `docs/architecture.md` | Requirements coverage |
+| 3 | design-review-agent | `docs/design-review.md` | Risks documented |
+| 4 | impl-planning-agent | `docs/impl-plan.md` | Tasks cover all components |
 | 5 | implementation-agent | Source files | Human approval, builds successfully |
-| 6 | review-agent | `code-review.md` | No critical unresolved findings |
-| 7 | verification-agent | Tests, `verification-report.md` | All tests pass |
-| 8 | pr-agent | `pr-description.md`, `CHANGELOG.md` | All 5 required PR sections present |
+| 6 | review-agent | `docs/code-review.md` | No critical unresolved findings |
+| 7 | verification-agent | Tests, `docs/verification-report.md` | All tests pass |
+| 8 | pr-agent | `docs/pr-description.md`, `docs/CHANGELOG.md` | All 5 required PR sections present |
 
 ## How to Use
 
@@ -65,7 +65,7 @@ The orchestrator will:
 You can also invoke any agent directly for a specific task:
 
 ```
-User: "Use the architecture-agent to design the system based on requirements.md"
+User: "Use the architecture-agent to design the system based on docs/requirements.md"
 ```
 
 ## Configuration

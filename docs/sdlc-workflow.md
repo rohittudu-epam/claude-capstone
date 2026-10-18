@@ -16,7 +16,7 @@ The Agentic SDLC pipeline executes 8 sequential stages, each handled by a specia
 │  STAGE 1: REQUIREMENTS                   │
 │  Agent: requirements-agent               │
 │  Gate: User approval                     │
-│  Output: requirements.md                 │
+│  Output: docs/requirements.md                 │
 └──────────────────┬───────────────────────┘
                    │
                    ▼
@@ -24,7 +24,7 @@ The Agentic SDLC pipeline executes 8 sequential stages, each handled by a specia
 │  STAGE 2: ARCHITECTURE                   │
 │  Agent: architecture-agent               │
 │  Gate: Requirements coverage             │
-│  Output: architecture.md                 │
+│  Output: docs/architecture.md                 │
 └──────────────────┬───────────────────────┘
                    │
                    ▼
@@ -32,8 +32,8 @@ The Agentic SDLC pipeline executes 8 sequential stages, each handled by a specia
 │  STAGE 3: DESIGN REVIEW                  │
 │  Agent: design-review-agent              │
 │  Gate: No unresolved Critical findings   │
-│  Output: design-review.md,              │
-│          updated architecture.md         │
+│  Output: docs/design-review.md,              │
+│          updated docs/architecture.md         │
 └──────────────────┬───────────────────────┘
                    │
                    ▼
@@ -41,7 +41,7 @@ The Agentic SDLC pipeline executes 8 sequential stages, each handled by a specia
 │  STAGE 4: IMPLEMENTATION PLANNING        │
 │  Agent: impl-planning-agent              │
 │  Gate: All components have tasks         │
-│  Output: impl-plan.md                    │
+│  Output: docs/impl-plan.md                    │
 └──────────────────┬───────────────────────┘
                    │
                    ▼
@@ -57,7 +57,7 @@ The Agentic SDLC pipeline executes 8 sequential stages, each handled by a specia
 │  STAGE 6: CODE REVIEW                    │
 │  Agent: review-agent                     │
 │  Gate: No unresolved Critical/High       │
-│  Output: code-review.md, fixes          │
+│  Output: docs/code-review.md, fixes          │
 └──────────────────┬───────────────────────┘
                    │
                    ▼
@@ -66,7 +66,7 @@ The Agentic SDLC pipeline executes 8 sequential stages, each handled by a specia
 │  Agent: verification-agent               │
 │  Gate: All tests pass                    │
 │  Output: Test files,                    │
-│          verification-report.md          │
+│          docs/verification-report.md          │
 └──────────────────┬───────────────────────┘
                    │
                    ▼
@@ -74,8 +74,8 @@ The Agentic SDLC pipeline executes 8 sequential stages, each handled by a specia
 │  STAGE 8: PULL REQUEST                   │
 │  Agent: pr-agent                         │
 │  Gate: All 5 PR sections present         │
-│  Output: pr-description.md,             │
-│          CHANGELOG.md, PR (if gh avail)  │
+│  Output: docs/pr-description.md,             │
+│          docs/CHANGELOG.md, PR (if gh avail)  │
 └──────────────────┬───────────────────────┘
                    │
                    ▼
@@ -89,7 +89,7 @@ The Agentic SDLC pipeline executes 8 sequential stages, each handled by a specia
 
 | Stage | Gate | Criteria | Failure Action |
 |-------|------|----------|---------------|
-| 1 | User approval | User explicitly approves `requirements.md` | Re-elicit with feedback |
+| 1 | User approval | User explicitly approves `docs/requirements.md` | Re-elicit with feedback |
 | 2 | Requirements coverage | Every FR maps to a component | Add missing components |
 | 3 | Design review | No unresolved Critical findings | Remediate and re-review |
 | 4 | Task completeness | Every component has implementation tasks | Add missing tasks |
@@ -102,14 +102,14 @@ The Agentic SDLC pipeline executes 8 sequential stages, each handled by a specia
 
 | Artifact | Created By | Read By | Modified By |
 |----------|-----------|---------|-------------|
-| `requirements.md` | requirements-agent | architecture-agent, design-review-agent, implementation-agent, review-agent, verification-agent, pr-agent | requirements-agent (revisions) |
-| `architecture.md` | architecture-agent | design-review-agent, impl-planning-agent, implementation-agent, review-agent, pr-agent | design-review-agent (fixes) |
-| `design-review.md` | design-review-agent | impl-planning-agent, pr-agent | — |
-| `impl-plan.md` | impl-planning-agent | implementation-agent, pr-agent | — |
+| `docs/requirements.md` | requirements-agent | architecture-agent, design-review-agent, implementation-agent, review-agent, verification-agent, pr-agent | requirements-agent (revisions) |
+| `docs/architecture.md` | architecture-agent | design-review-agent, impl-planning-agent, implementation-agent, review-agent, pr-agent | design-review-agent (fixes) |
+| `docs/design-review.md` | design-review-agent | impl-planning-agent, pr-agent | — |
+| `docs/impl-plan.md` | impl-planning-agent | implementation-agent, pr-agent | — |
 | Source files | implementation-agent | review-agent, verification-agent, pr-agent | review-agent (fixes), verification-agent (bug fixes) |
-| `code-review.md` | review-agent | verification-agent, pr-agent | — |
+| `docs/code-review.md` | review-agent | verification-agent, pr-agent | — |
 | Test files | verification-agent | pr-agent | — |
-| `verification-report.md` | verification-agent | pr-agent | — |
-| `pr-description.md` | pr-agent | — | — |
-| `CHANGELOG.md` | pr-agent | — | — |
+| `docs/verification-report.md` | verification-agent | pr-agent | — |
+| `docs/pr-description.md` | pr-agent | — | — |
+| `docs/CHANGELOG.md` | pr-agent | — | — |
 | `workflow-state.json` | orchestrator | orchestrator | orchestrator |

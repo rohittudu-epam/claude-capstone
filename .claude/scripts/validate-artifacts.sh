@@ -51,35 +51,35 @@ echo "========================================="
 echo ""
 
 echo "--- Stage 1: Requirements ---"
-check_file "requirements.md" "required" "Requirements document"
-if [ -f "requirements.md" ]; then
-  check_section "requirements.md" "Functional Requirements"
-  check_section "requirements.md" "Non-Functional Requirements"
+check_file "docs/requirements.md" "required" "Requirements document"
+if [ -f "docs/requirements.md" ]; then
+  check_section "docs/requirements.md" "Functional Requirements"
+  check_section "docs/requirements.md" "Non-Functional Requirements"
 fi
 
 echo ""
 echo "--- Stage 2: Architecture ---"
-check_file "architecture.md" "required" "Architecture document"
-if [ -f "architecture.md" ]; then
-  check_section "architecture.md" "Components"
-  check_section "architecture.md" "Technology Choices"
-  check_section "architecture.md" "Data Flow"
+check_file "docs/architecture.md" "required" "Architecture document"
+if [ -f "docs/architecture.md" ]; then
+  check_section "docs/architecture.md" "Components"
+  check_section "docs/architecture.md" "Technology Choices"
+  check_section "docs/architecture.md" "Data Flow"
 fi
 
 echo ""
 echo "--- Stage 3: Design Review ---"
-check_file "design-review.md" "required" "Design review document"
-if [ -f "design-review.md" ]; then
-  check_section "design-review.md" "Review Summary"
-  check_section "design-review.md" "Review Findings"
+check_file "docs/design-review.md" "required" "Design review document"
+if [ -f "docs/design-review.md" ]; then
+  check_section "docs/design-review.md" "Review Summary"
+  check_section "docs/design-review.md" "Review Findings"
 fi
 
 echo ""
 echo "--- Stage 4: Implementation Plan ---"
-check_file "impl-plan.md" "required" "Implementation plan"
-if [ -f "impl-plan.md" ]; then
-  check_section "impl-plan.md" "Task List"
-  check_section "impl-plan.md" "Execution Order"
+check_file "docs/impl-plan.md" "required" "Implementation plan"
+if [ -f "docs/impl-plan.md" ]; then
+  check_section "docs/impl-plan.md" "Task List"
+  check_section "docs/impl-plan.md" "Execution Order"
 fi
 
 echo ""
@@ -94,23 +94,23 @@ fi
 
 echo ""
 echo "--- Stage 6: Code Review ---"
-check_file "code-review.md" "required" "Code review report"
-if [ -f "code-review.md" ]; then
-  check_section "code-review.md" "Correctness"
-  check_section "code-review.md" "Security"
-  check_section "code-review.md" "Error Handling"
-  check_section "code-review.md" "Test Coverage"
-  check_section "code-review.md" "Code Clarity"
-  check_section "code-review.md" "DRY Principle"
-  check_section "code-review.md" "Dependency Safety"
+check_file "docs/code-review.md" "required" "Code review report"
+if [ -f "docs/code-review.md" ]; then
+  check_section "docs/code-review.md" "Correctness"
+  check_section "docs/code-review.md" "Security"
+  check_section "docs/code-review.md" "Error Handling"
+  check_section "docs/code-review.md" "Test Coverage"
+  check_section "docs/code-review.md" "Code Clarity"
+  check_section "docs/code-review.md" "DRY Principle"
+  check_section "docs/code-review.md" "Dependency Safety"
 fi
 
 echo ""
 echo "--- Stage 7: Verification ---"
-check_file "verification-report.md" "required" "Verification report"
-if [ -f "verification-report.md" ]; then
-  check_section "verification-report.md" "Test Summary"
-  check_section "verification-report.md" "Test Execution Output"
+check_file "docs/verification-report.md" "required" "Verification report"
+if [ -f "docs/verification-report.md" ]; then
+  check_section "docs/verification-report.md" "Test Summary"
+  check_section "docs/verification-report.md" "Test Execution Output"
 fi
 if [ -d "tests" ] || [ -d "test" ] || [ -d "__tests__" ]; then
   echo -e "${GREEN}✅ PASS${NC} Test directory exists"
@@ -122,15 +122,15 @@ fi
 
 echo ""
 echo "--- Stage 8: PR ---"
-check_file "pr-description.md" "required" "PR description"
-if [ -f "pr-description.md" ]; then
-  check_section "pr-description.md" "Summary"
-  check_section "pr-description.md" "Changes Made"
-  check_section "pr-description.md" "Test Evidence"
-  check_section "pr-description.md" "Known Limitations"
-  check_section "pr-description.md" "Reviewer Checklist"
+check_file "docs/pr-description.md" "required" "PR description"
+if [ -f "docs/pr-description.md" ]; then
+  check_section "docs/pr-description.md" "Summary"
+  check_section "docs/pr-description.md" "Changes Made"
+  check_section "docs/pr-description.md" "Test Evidence"
+  check_section "docs/pr-description.md" "Known Limitations"
+  check_section "docs/pr-description.md" "Reviewer Checklist"
 fi
-check_file "CHANGELOG.md" "required" "Changelog"
+check_file "docs/CHANGELOG.md" "required" "Changelog"
 
 echo ""
 echo "========================================="

@@ -7,20 +7,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This is an **Agentic SDLC Pipeline** — an 8-stage workflow automation system that orchestrates Claude Code agents to produce complete software projects from user stories. Each stage has a specialist agent responsible for that phase, coordinated by a central orchestrator.
 
 The pipeline produces:
-- Requirements specifications (`requirements.md`)
-- System architecture (`architecture.md`)
-- Design review and risk analysis (`design-review.md`)
-- Implementation plan with task breakdown (`impl-plan.md`)
+- Requirements specifications (`docs/requirements.md`)
+- System architecture (`docs/architecture.md`)
+- Design review and risk analysis (`docs/design-review.md`)
+- Implementation plan with task breakdown (`docs/impl-plan.md`)
 - Production source code
-- Code review findings and fixes (`code-review.md`)
-- Test suite and verification report (`verification-report.md`)
-- Complete PR description with changelog (`pr-description.md`, `CHANGELOG.md`)
+- Code review findings and fixes (`docs/code-review.md`)
+- Test suite and verification report (`docs/verification-report.md`)
+- Complete PR description with changelog (`docs/pr-description.md`, `docs/CHANGELOG.md`)
 
 ## Quick Start
 
 To run a complete SDLC pipeline:
 
-1. Create a user story file (e.g., `user-story.md`):
+1. Create a user story file (e.g., `docs/user-story.md`):
    ```markdown
    # User Story
    
@@ -38,7 +38,7 @@ To run a complete SDLC pipeline:
 
 3. In Claude Code, invoke the pipeline:
    ```
-   Run the full SDLC pipeline for the user story in user-story.md
+   Run the full SDLC pipeline for the user story in docs/user-story.md
    ```
 
 ## Architecture & Key Concepts
@@ -151,7 +151,7 @@ The `verification-agent` generates and runs tests during stage 7. Test framework
 - **Go**: `go test`
 - **Java**: Maven/Gradle + JUnit
 
-All generated tests are placed in a `tests/` directory (or project-appropriate location) and are automatically run during verification. The verification-report.md documents all test results and coverage.
+All generated tests are placed in a `tests/` directory (or project-appropriate location) and are automatically run during verification. The docs/verification-report.md documents all test results and coverage.
 
 ## Permissions Configuration
 
@@ -170,16 +170,16 @@ After a complete pipeline run, the project contains:
 
 | File | Description | Created By |
 |------|-------------|-----------|
-| `requirements.md` | Functional and non-functional requirements | requirements-agent |
-| `architecture.md` | System design with components and tech stack | architecture-agent (updated by design-review-agent) |
-| `design-review.md` | Risk analysis and design decisions | design-review-agent |
-| `impl-plan.md` | Prioritized task breakdown | impl-planning-agent |
+| `docs/requirements.md` | Functional and non-functional requirements | requirements-agent |
+| `docs/architecture.md` | System design with components and tech stack | architecture-agent (updated by design-review-agent) |
+| `docs/design-review.md` | Risk analysis and design decisions | design-review-agent |
+| `docs/impl-plan.md` | Prioritized task breakdown | impl-planning-agent |
 | `src/` (or similar) | Production source code | implementation-agent |
 | `tests/` | Unit and integration test suite | verification-agent |
-| `code-review.md` | Code review findings and fixes applied | review-agent |
-| `verification-report.md` | Test results and quality metrics | verification-agent |
-| `pr-description.md` | Complete PR description (5 sections) | pr-agent |
-| `CHANGELOG.md` | Project changelog | pr-agent |
+| `docs/code-review.md` | Code review findings and fixes applied | review-agent |
+| `docs/verification-report.md` | Test results and quality metrics | verification-agent |
+| `docs/pr-description.md` | Complete PR description (5 sections) | pr-agent |
+| `docs/CHANGELOG.md` | Project changelog | pr-agent |
 | `workflow-state.json` | Pipeline execution state (for resume) | orchestrator |
 
 ## Troubleshooting

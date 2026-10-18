@@ -69,7 +69,7 @@ Configure these on the remote (they cannot be set from the repository):
 
 - Tag releases on `main` with semantic versions: `v0.1.0` for the first MVP release.
 - Hotfixes branch from the tag, merge to `main` via PR, and are re-tagged with a patch bump.
-- `CHANGELOG.md` is updated in the PR that precedes a release tag.
+- `docs/CHANGELOG.md` is updated in the PR that precedes a release tag.
 
 ## Rules of Thumb
 
