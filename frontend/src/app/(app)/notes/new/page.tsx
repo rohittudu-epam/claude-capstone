@@ -6,8 +6,12 @@ export const metadata: Metadata = { title: "New note" };
 
 export default function NewNotePage() {
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 pb-24 pt-6 sm:px-6 sm:pt-8">
-      <h1 className="mb-6 font-mono text-2xl font-semibold text-text-primary">New note</h1>
+    <div className="mx-auto w-full max-w-[1500px] px-4 pb-10 pt-5 sm:px-6 sm:pt-6 lg:px-8">
+      <header className="mb-6 border-b border-border-subtle pb-5">
+        <p className="section-label mb-2">Workspace / Notes</p>
+        <h1 className="font-mono text-2xl font-semibold text-text-primary sm:text-3xl">New note</h1>
+        <p className="mt-1 text-sm text-text-secondary">Capture an idea in Markdown.</p>
+      </header>
       <NoteEditor />
     </div>
   );

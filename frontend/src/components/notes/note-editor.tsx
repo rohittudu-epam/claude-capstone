@@ -164,7 +164,13 @@ export function NoteEditor({ note }: { note?: Note }) {
   const canSubmit = !saving && title.trim().length > 0;
 
   return (
-    <form onSubmit={onSubmit} onKeyDown={onKeyDown} noValidate className="space-y-5" aria-label={note ? "Edit note" : "New note"}>
+    <form
+      onSubmit={onSubmit}
+      onKeyDown={onKeyDown}
+      noValidate
+      className="space-y-6"
+      aria-label={note ? "Edit note" : "New note"}
+    >
       {formError && (
         <div role="alert" className="rounded-lg border border-danger/30 bg-danger/10 p-3 text-sm text-danger">
           {formError}
@@ -172,8 +178,8 @@ export function NoteEditor({ note }: { note?: Note }) {
       )}
 
       {/* Title Field */}
-      <div>
-        <Label htmlFor="title">Title</Label>
+      <div className="rounded-xl border border-border-subtle bg-bg-surface p-4 sm:p-5">
+        <Label htmlFor="title" className="section-label">Title</Label>
         <Input
           id="title"
           ref={titleRef}
@@ -194,7 +200,7 @@ export function NoteEditor({ note }: { note?: Note }) {
           placeholder="Untitled note"
           aria-invalid={Boolean(titleError)}
           aria-describedby={titleError ? "title-error" : undefined}
-          className="text-lg"
+          className="h-12 border-transparent bg-transparent px-0 text-xl font-semibold shadow-none focus-visible:border-transparent focus-visible:shadow-none sm:text-2xl"
         />
         {titleError && (
           <p id="title-error" className="mt-1.5 text-sm text-danger">
@@ -204,18 +210,23 @@ export function NoteEditor({ note }: { note?: Note }) {
       </div>
 
       {/* Tags Field */}
-      <TagInput
+      <div className="rounded-xl border border-border-subtle bg-bg-surface p-4 sm:p-5">
+        <TagInput
         value={tags}
         onChange={edited(setTags)}
         suggestions={(existingTags.data ?? []).map((t) => t.name)}
         error={errors.tags}
-      />
+        />
+      </div>
 
       {/* Editor Section */}
-      <div>
-        <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
-          <Label id="body-label">Note</Label>
-          <div role="tablist" aria-label="Editor mode" className="flex rounded-lg border border-border-strong overflow-hidden">
+      <div className="overflow-hidden rounded-xl border border-border-subtle bg-bg-surface">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-subtle px-4 py-3 sm:px-5">
+          <div>
+            <Label id="body-label" className="mb-0 section-label">Markdown editor</Label>
+            <p className="mt-1 text-xs text-text-muted">Write with Markdown and preview before saving.</p>
+          </div>
+          <div role="tablist" aria-label="Editor mode" className="flex overflow-hidden rounded-lg border border-border-strong">
             {(["write", "preview"] as const).map((value) => (
               <button
                 key={value}
@@ -240,7 +251,7 @@ export function NoteEditor({ note }: { note?: Note }) {
         </div>
 
         {mode === "write" ? (
-          <div id="write-panel" role="tabpanel" aria-labelledby="body-label">
+          <div id="write-panel" role="tabpanel" aria-labelledby="body-label" className="p-3 sm:p-5">
             <Textarea
               id="body"
               value={body}
@@ -249,6 +260,7 @@ export function NoteEditor({ note }: { note?: Note }) {
               aria-label="Note content, Markdown"
               aria-invalid={Boolean(errors.body)}
               aria-describedby={errors.body ? "body-error" : "word-count"}
+              className="min-h-[min(60vh,600px)] resize-y rounded-lg border-border-strong bg-bg-elevated p-4 text-[15px] leading-7"
             />
             <div className="mt-1.5 flex items-center justify-between text-xs text-text-muted">
               <span id="word-count">{wordCount} {wordCount === 1 ? "word" : "words"}</span>
@@ -264,7 +276,7 @@ export function NoteEditor({ note }: { note?: Note }) {
             id="preview-panel"
             role="tabpanel"
             aria-labelledby="body-label"
-            className="min-h-[280px] rounded-lg border border-border-subtle bg-bg-elevated p-4"
+            className="min-h-[min(60vh,600px)] overflow-y-auto border-t border-border-subtle bg-bg-elevated p-4 sm:p-6"
           >
             {body.trim() ? <Markdown>{body}</Markdown> : <p className="text-text-muted">Nothing to preview yet</p>}
           </div>
@@ -272,14 +284,14 @@ export function NoteEditor({ note }: { note?: Note }) {
       </div>
 
       {note && (
-        <p className="text-xs text-text-secondary">
-          Created <time dateTime={note.created_at}>{formatDate(note.created_at)}</time> · Updated{" "}
-          <time dateTime={note.updated_at}>{formatDate(note.updated_at)}</time>
-        </p>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-border-subtle pt-4 text-xs text-text-muted">
+          <span>Created <time dateTime={note.created_at}>{formatDate(note.created_at)}</time></span>
+          <span>Updated <time dateTime={note.updated_at}>{formatDate(note.updated_at)}</time></span>
+        </div>
       )}
 
-      {/* Actions - Sticky on mobile */}
-      <div className="fixed bottom-0 left-0 right-0 z-20 border-t border-border-subtle bg-bg-surface p-4 shadow-lg sm:static sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none">
+      {/* Actions */}
+      <div className="rounded-xl border border-border-subtle bg-bg-surface p-4 sm:p-5">
         <div className="flex flex-wrap items-center gap-3">
           <Button type="submit" disabled={!canSubmit} loading={saving} className="flex-1 sm:flex-initial">
             {note ? "Save changes" : "Create note"}
@@ -289,7 +301,7 @@ export function NoteEditor({ note }: { note?: Note }) {
           </Button>
           {saved && <span role="status" className="hidden text-sm text-success sm:inline">Saved</span>}
           {note && !confirmingDelete && (
-            <Button variant="secondary" className="ml-auto hidden sm:inline-flex" onClick={() => setConfirmingDelete(true)}>
+            <Button variant="secondary" className="ml-auto border-danger/40 text-danger hover:bg-danger/10" onClick={() => setConfirmingDelete(true)}>
               Delete
             </Button>
           )}
