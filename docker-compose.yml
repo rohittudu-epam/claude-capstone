@@ -244,14 +244,42 @@ services:
       - "traefik.http.routers.graph.rule=PathPrefix(`/api/graph`)"
       - "traefik.http.services.graph.loadbalancer.server.port=8000"
 
+  nginx:
+    image: nginx:alpine
+    container_name: linknote-nginx
+    ports:
+      - "${APP_PORT:-3000}:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      frontend:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+      note-service:
+        condition: service_healthy
+      link-service:
+        condition: service_healthy
+      graph-service:
+        condition: service_healthy
+    networks:
+      - frontend
+      - backend
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:80"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
   frontend:
     build:
       context: ./frontend
     container_name: linknote-frontend
     environment:
       NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost}
-    ports:
-      - "${FRONTEND_PORT:-3000}:3000"
+    expose:
+      - "3000"
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3000"]
       interval: 10s
