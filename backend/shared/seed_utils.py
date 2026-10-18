@@ -5,7 +5,7 @@ the CLI script and from the Docker compose seed service.
 """
 
 from datetime import UTC, datetime, timedelta
-from typing import Any
+from typing import Any, cast
 from uuid import UUID
 
 from sqlalchemy import select
@@ -1132,7 +1132,7 @@ def seed_notes(session: Session, user: User) -> dict[str, UUID]:
 
     Returns dict of note_title -> note_id.
     """
-    note_ids = {}
+    note_ids: dict[str, UUID] = {}
     created_count = 0
     skipped_count = 0
     now = datetime.now(UTC)
@@ -1149,7 +1149,7 @@ def seed_notes(session: Session, user: User) -> dict[str, UUID]:
             continue
 
         # Create note with realistic timestamps
-        days_ago = note_data.get("days_ago", 0)
+        days_ago = cast(float, note_data.get("days_ago", 0))
         created_at = now - timedelta(days=days_ago)
 
         note = Note(
@@ -1164,7 +1164,7 @@ def seed_notes(session: Session, user: User) -> dict[str, UUID]:
         note_ids[title] = note.id
 
         # Create/get tags
-        for tag_name in note_data["tags"]:
+        for tag_name in cast(list[str], note_data["tags"]):
             tag = session.scalars(select(Tag).where(Tag.owner_id == user.id, Tag.name == tag_name)).first()
             if not tag:
                 tag = Tag(owner_id=user.id, name=tag_name)
@@ -1289,7 +1289,7 @@ def run_seed(
         session_maker = get_sessionmaker()
 
     session = session_maker()
-    summary = {"user_created": False, "notes_created": 0, "links_created": 0}
+    summary: dict[str, Any] = {"user_created": False, "notes_created": 0, "links_created": 0}
 
     try:
         print(f"\n📝 Seeding database for {email}...")
