@@ -63,7 +63,13 @@ export function AuthGate({ children }: { children: ReactNode }) {
     <div className="min-h-screen">
       <header className="border-b border-border bg-surface">
         <div className="mx-auto flex max-w-5xl items-center gap-6 px-4 py-3">
-          <span className="font-semibold">LinkNote</span>
+          <Link
+            href="/notes"
+            aria-label="LinkNote, go to notes"
+            className="rounded-md px-1 text-lg font-semibold text-ink hover:text-brand"
+          >
+            LinkNote
+          </Link>
           <nav aria-label="Main" className="flex gap-1">
             {NAV.map((item) => {
               const current = pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -80,6 +86,9 @@ export function AuthGate({ children }: { children: ReactNode }) {
             })}
           </nav>
           <div className="ml-auto flex items-center gap-3 text-sm">
+            <Button asChild size="sm">
+              <Link href="/notes/new">+ New note</Link>
+            </Button>
             <span className="text-ink-soft">{me.data.email}</span>
             <Button variant="secondary" size="sm" onClick={signOut}>
               Sign out

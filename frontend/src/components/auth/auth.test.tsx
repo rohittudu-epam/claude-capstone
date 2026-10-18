@@ -242,3 +242,15 @@ describe("AuthGate", () => {
     expect(to("POST", "/api/auth/logout")).toHaveLength(1);
   });
 });
+
+describe("AuthGate navigation", () => {
+  it("links the logo home and offers a New note action on every page", async () => {
+    mockFetch({ "GET /api/auth/me": { json: { id: "u1", email: "alice@example.com" } } });
+    state.pathname = "/graph";
+    renderWithClient(<AuthGate>content</AuthGate>);
+    const logo = await screen.findByRole("link", { name: "LinkNote, go to notes" });
+    expect(logo).toHaveAttribute("href", "/notes");
+    expect(screen.getByRole("link", { name: "+ New note" })).toHaveAttribute("href", "/notes/new");
+    expect(screen.getByRole("link", { name: "Graph" })).toHaveAttribute("aria-current", "page");
+  });
+});

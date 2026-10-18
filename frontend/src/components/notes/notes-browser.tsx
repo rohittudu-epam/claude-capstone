@@ -77,9 +77,9 @@ export function NotesBrowser() {
             <EmptyState title="No notes match your search">Try different words or clear the filters.</EmptyState>
           ) : (
             <EmptyState title="You have no notes yet">
-              <Link className="text-brand underline" href="/notes/new">
-                Write your first note
-              </Link>
+              <Button asChild className="mt-2">
+                <Link href="/notes/new">Create your first note</Link>
+              </Button>
             </EmptyState>
           )
         ) : (

@@ -36,5 +36,6 @@ export async function createNoteViaUi(page: Page, note: { title: string; body: s
     await input.press("Enter");
   }
   await page.getByRole("button", { name: "Create note" }).click();
-  await expect(page).toHaveURL(/\/notes\/[0-9a-f-]{36}$/);
+  await expect(page).toHaveURL(/\/notes$/);
+  await expect(page.getByText("Note created")).toBeVisible();
 }
