@@ -5,8 +5,12 @@ import { cn } from "@/lib/utils";
 const control =
   "w-full rounded-md border border-border bg-surface px-3 text-sm text-ink placeholder:text-ink-soft aria-[invalid=true]:border-danger disabled:opacity-60";
 
-export function Input({ className, ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
-  return <input className={cn(control, "h-10", className)} {...props} />;
+export function Input({
+  className,
+  ref,
+  ...props
+}: React.InputHTMLAttributes<HTMLInputElement> & { ref?: React.Ref<HTMLInputElement> }) {
+  return <input ref={ref} className={cn(control, "h-10", className)} {...props} />;
 }
 
 export function Textarea({ className, ...props }: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {

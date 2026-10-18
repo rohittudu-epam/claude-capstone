@@ -2,13 +2,14 @@
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 
 import { Markdown } from "@/components/notes/markdown";
 import { TagInput } from "@/components/notes/tag-input";
 import { Button } from "@/components/ui/button";
 import { describeError } from "@/components/ui/feedback";
 import { Field, Input, Textarea } from "@/components/ui/field";
+import { useToast } from "@/components/ui/toast";
 import { ApiError, api } from "@/lib/api";
 import type { Note } from "@/lib/types";
 import { cn, formatDate } from "@/lib/utils";
@@ -31,6 +32,29 @@ export function NoteEditor({ note }: { note?: Note }) {
   const [saving, setSaving] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const submitting = useRef(false); // synchronous guard: state updates are too late to stop a double click
+  const titleRef = useRef<HTMLInputElement>(null);
+  const toast = useToast();
+
+  useEffect(() => {
+    if (!note) titleRef.current?.focus();
+  }, [note]);
+
+  const dirty = note
+    ? title !== note.title || body !== note.body || tags.join("\n") !== note.tags.join("\n")
+    : Boolean(title || body || tags.length);
+
+  function cancel() {
+    if (dirty && !window.confirm("Discard your changes?")) return;
+    router.push("/notes");
+  }
+
+  function onKeyDown(event: KeyboardEvent<HTMLFormElement>) {
+    if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
+      event.preventDefault();
+      event.currentTarget.requestSubmit();
+    }
+  }
 
   const existingTags = useQuery({ queryKey: ["tags"], queryFn: api.listTags });
 
@@ -59,11 +83,13 @@ export function NoteEditor({ note }: { note?: Note }) {
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
+    if (submitting.current) return;
     const next = validate();
     setErrors(next);
     setFormError(null);
     if (Object.keys(next).length > 0) return;
 
+    submitting.current = true;
     setSaving(true);
     try {
       const payload = { title: title.trim(), body, tags };
@@ -72,8 +98,11 @@ export function NoteEditor({ note }: { note?: Note }) {
       refreshCaches();
       if (note) {
         setSaved(true);
+        toast.success("Note updated");
       } else {
-        router.push(`/notes/${result.id}`);
+        toast.success("Note created");
+        router.push("/notes");
+        return; // stay locked while navigating away, so a late second click can't create a duplicate
       }
     } catch (error) {
       if (error instanceof ApiError && error.status === 400 && error.fieldErrors.length > 0) {
@@ -87,9 +116,9 @@ export function NoteEditor({ note }: { note?: Note }) {
       } else {
         setFormError(describeError(error));
       }
-    } finally {
-      setSaving(false);
     }
+    submitting.current = false;
+    setSaving(false);
   }
 
   async function onDelete() {
@@ -108,7 +137,7 @@ export function NoteEditor({ note }: { note?: Note }) {
   }
 
   return (
-    <form onSubmit={onSubmit} noValidate className="space-y-4" aria-label={note ? "Edit note" : "New note"}>
+    <form onSubmit={onSubmit} onKeyDown={onKeyDown} noValidate className="space-y-4" aria-label={note ? "Edit note" : "New note"}>
       {formError ? (
         <p role="alert" className="rounded-md border border-danger bg-surface p-3 text-sm text-danger">
           {formError}
@@ -117,7 +146,7 @@ export function NoteEditor({ note }: { note?: Note }) {
 
       <Field id="title" label="Title" error={errors.title}>
         {(props) => (
-          <Input {...props} value={title} onChange={(e) => edited(setTitle)(e.target.value)} maxLength={MAX_TITLE_LENGTH + 50} />
+          <Input {...props} ref={titleRef} value={title} onChange={(e) => edited(setTitle)(e.target.value)} maxLength={MAX_TITLE_LENGTH + 50} />
         )}
       </Field>
 
@@ -170,6 +199,9 @@ export function NoteEditor({ note }: { note?: Note }) {
       <div className="flex flex-wrap items-center gap-3">
         <Button type="submit" disabled={saving}>
           {saving ? "Saving…" : note ? "Save changes" : "Create note"}
+        </Button>
+        <Button variant="secondary" disabled={saving} onClick={cancel}>
+          Cancel
         </Button>
         {saved ? <span role="status">Saved.</span> : null}
         {note && !confirmingDelete ? (

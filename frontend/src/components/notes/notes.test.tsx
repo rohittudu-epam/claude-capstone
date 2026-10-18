@@ -29,7 +29,7 @@ describe("NoteEditor", () => {
     expect(to("POST", "/api/notes")).toHaveLength(0);
   });
 
-  it("creates a note with normalised, de-duplicated tags and opens it", async () => {
+  it("creates a note with normalised, de-duplicated tags and returns to the list", async () => {
     const { to } = mockFetch({
       ...TAGS,
       "POST /api/notes": { status: 201, json: note({ id: "new-id" }) },
@@ -45,8 +45,51 @@ describe("NoteEditor", () => {
     expect(within(screen.getByRole("list", { name: "Selected tags" })).getAllByRole("listitem")).toHaveLength(2);
     await user.click(screen.getByRole("button", { name: "Create note" }));
 
-    await waitFor(() => expect(router.push).toHaveBeenCalledWith("/notes/new-id"));
+    await waitFor(() => expect(router.push).toHaveBeenCalledWith("/notes"));
     expect(to("POST", "/api/notes")[0]?.body).toEqual({ title: "My note", body: "# Heading", tags: ["devops", "dev ops"] });
+  });
+
+  it("focuses the title, and creates only one note on rapid double submit", async () => {
+    const { to } = mockFetch({ ...TAGS, "POST /api/notes": { status: 201, json: note({ id: "n9" }) } });
+    const user = userEvent.setup();
+    renderWithClient(<NoteEditor />);
+    expect(screen.getByLabelText("Title")).toHaveFocus();
+    await user.type(screen.getByLabelText("Title"), "Once");
+    const button = screen.getByRole("button", { name: "Create note" });
+    await user.dblClick(button);
+    await waitFor(() => expect(router.push).toHaveBeenCalledWith("/notes"));
+    expect(to("POST", "/api/notes")).toHaveLength(1);
+  });
+
+  it("saves with Ctrl+Enter", async () => {
+    const { to } = mockFetch({ ...TAGS, "POST /api/notes": { status: 201, json: note({ id: "n8" }) } });
+    const user = userEvent.setup();
+    renderWithClient(<NoteEditor />);
+    await user.type(screen.getByLabelText("Title"), "Quick{Control>}{Enter}{/Control}");
+    await waitFor(() => expect(to("POST", "/api/notes")).toHaveLength(1));
+  });
+
+  it("cancels immediately when untouched and asks first when there is input", async () => {
+    mockFetch(TAGS);
+    const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
+    const user = userEvent.setup();
+    renderWithClient(<NoteEditor />);
+    router.push.mockClear();
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(confirm).not.toHaveBeenCalled();
+    expect(router.push).toHaveBeenCalledWith("/notes");
+
+    router.push.mockClear();
+    await user.type(screen.getByLabelText("Title"), "draft");
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(confirm).toHaveBeenCalledTimes(1);
+    expect(router.push).not.toHaveBeenCalled();
+    expect(screen.getByLabelText("Title")).toHaveValue("draft");
+
+    confirm.mockReturnValue(true);
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(router.push).toHaveBeenCalledWith("/notes");
+    confirm.mockRestore();
   });
 
   it("does not submit the form when Enter is pressed in the tag box", async () => {
@@ -160,7 +203,7 @@ describe("NoteEditor", () => {
     renderWithClient(<NoteEditor note={note()} />);
     await user.click(screen.getByRole("button", { name: "Delete" }));
     expect(to("DELETE", "/api/notes/n1")).toHaveLength(0);
-    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    await user.click(within(screen.getByRole("alertdialog")).getByRole("button", { name: "Cancel" }));
     expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Delete" }));
@@ -216,7 +259,7 @@ describe("NotesBrowser", () => {
     mockFetch({ "GET /api/tags": { json: [] }, "GET /api/notes": { json: page([]) } });
     renderWithClient(<NotesBrowser />);
     expect(await screen.findByText("You have no notes yet")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Write your first note" })).toHaveAttribute("href", "/notes/new");
+    expect(screen.getByRole("link", { name: "Create your first note" })).toHaveAttribute("href", "/notes/new");
   });
 
   it("searches after a pause using the search endpoint, and says when nothing matches", async () => {
