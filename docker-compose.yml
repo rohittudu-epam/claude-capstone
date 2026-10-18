@@ -78,16 +78,16 @@ services:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
-      - "--entrypoints.websecure.address=:443"
     ports:
       - "80:80"
-      - "443:443"
       - "127.0.0.1:8080:8080"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - frontend
       - backend
+    profiles:
+      - with-proxy
 
   migrate:
     build:
@@ -105,6 +105,29 @@ services:
     networks:
       - backend
 
+  seed:
+    build:
+      context: ./backend
+      args:
+        SERVICE: auth-service
+    container_name: linknote-seed
+    command: ["python", "-m", "scripts.seed"]
+    environment:
+      <<: *backend-env
+      SEED_ON_START: ${SEED_ON_START:-true}
+      SEED_DEMO_EMAIL: ${SEED_DEMO_EMAIL:-demo@linknote.local}
+      SEED_DEMO_PASSWORD: ${SEED_DEMO_PASSWORD:-demo123456}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    restart: "no"
+    networks:
+      - backend
+    volumes:
+      - ./scripts:/app/scripts:ro
+
   auth-service:
     build:
       context: ./backend
@@ -117,6 +140,8 @@ services:
     healthcheck: *backend-health
     networks:
       - backend
+    ports:
+      - "127.0.0.1:8001:8000"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.auth.rule=PathPrefix(`/api/auth`)"
@@ -141,6 +166,8 @@ services:
       <<: *backend-env
     depends_on: *backend-deps
     healthcheck: *backend-health
+    ports:
+      - "127.0.0.1:8002:8000"
     networks:
       - backend
     labels:
@@ -174,6 +201,8 @@ services:
       <<: *backend-env
     depends_on: *backend-deps
     healthcheck: *backend-health
+    ports:
+      - "127.0.0.1:8003:8000"
     networks:
       - backend
     labels:
@@ -207,6 +236,8 @@ services:
       <<: *backend-env
     depends_on: *backend-deps
     healthcheck: *backend-health
+    ports:
+      - "127.0.0.1:8004:8000"
     networks:
       - backend
     labels:
@@ -218,20 +249,28 @@ services:
     build:
       context: ./frontend
     container_name: linknote-frontend
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost}
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3000/login"]
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3000"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
     depends_on:
-      - traefik
+      auth-service:
+        condition: service_healthy
+      note-service:
+        condition: service_healthy
+      link-service:
+        condition: service_healthy
+      graph-service:
+        condition: service_healthy
     networks:
       - frontend
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
-      - "traefik.http.services.frontend.loadbalancer.server.port=3000"
+      - backend
 
 volumes:
   postgres_data:
