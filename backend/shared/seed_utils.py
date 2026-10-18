@@ -1138,7 +1138,7 @@ def seed_notes(session: Session, user: User) -> dict[str, UUID]:
     now = datetime.now(UTC)
 
     for note_data in SAMPLE_NOTES:
-        title = note_data["title"]
+        title = cast(str, note_data["title"])
 
         # Check if note already exists
         existing = session.scalars(select(Note).where(Note.owner_id == user.id, Note.title == title)).first()
