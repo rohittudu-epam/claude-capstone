@@ -4,8 +4,10 @@
   "description": "Markdown notes with smart link suggestions",
   "private": true,
   "scripts": {
-    "seed": "python scripts/seed-data.py --email demo@example.com --password demo123456",
+    "seed": "python scripts/seed-data.py --email demo@linknote.local --password demo123456",
     "seed:custom": "python scripts/seed-data.py",
+    "seed:reset": "echo 'Resetting database...' && docker compose down -v && docker compose up -d postgres redis && sleep 3 && docker compose up migrate seed",
+    "smoke": "bash scripts/smoke-test.sh",
     "dev:frontend": "cd frontend && npm run dev",
     "dev:backend": "cd backend && ./scripts/dev-all.sh",
     "build:frontend": "cd frontend && npm run build",
