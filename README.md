@@ -1,337 +1,369 @@
-# LinkNote MVP - Personal Knowledge Management
+# LinkNote - Markdown Notes with Smart Link Suggestions
 
-[![CI](https://github.com/rohittudu-epam/claude-capstone/actions/workflows/ci.yml/badge.svg)](https://github.com/rohittudu-epam/claude-capstone/actions/workflows/ci.yml)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+A knowledge management tool that turns your Markdown notes into an interconnected knowledge graph.
 
-A privacy-friendly personal knowledge management application that helps users create Markdown notes and discover meaningful relationships through AI-generated, user-approved link suggestions with interactive knowledge graph visualization.
+## Features
 
-Built using an **Agentic SDLC Pipeline** - an 8-stage automated workflow that orchestrates Claude Code agents to deliver production-grade software from user stories through implementation, review, verification, and deployment.
+- **Markdown Editor**: Write notes with live preview and syntax highlighting
+- **Smart Link Suggestions**: AI-powered suggestions for connecting related notes
+- **Interactive Graph**: Visualize connections between your notes
+- **Tag-Based Organization**: Flexible tagging system with filtering
+- **Full-Text Search**: Find any note instantly
+- **You Control Everything**: No links are created until you approve them
 
----
-
-## 🌟 Features
-
-### Core Functionality
-- **📝 Markdown Notes** - Create, edit, and organize notes with full Markdown support
-- **🏷️ Tag Management** - Categorize notes with tags for easy organization
-- **🔍 Full-Text Search** - Fast PostgreSQL-powered search across titles and content
-- **🔗 Smart Link Suggestions** - AI-powered discovery of relationships between notes
-- **📊 Knowledge Graph** - Interactive force-directed visualization of note relationships
-- **🔐 Secure Authentication** - JWT-based auth with refresh token rotation
-
-### Technical Highlights
-- **⚡ High Performance** - Search 6-18x faster than targets (27-59ms p95)
-- **✅ Well Tested** - 342 automated tests with 99.7% pass rate
-- **🏗️ Microservices Architecture** - 5 backend services with clear separation of concerns
-- **🐳 Docker Ready** - Complete containerized environment
-- **📈 Observable** - Structured logging with correlation IDs and health checks
-
----
-
-## 🏗️ Architecture
-
-### Backend Services
-- **Auth Service** - User registration, login, JWT token management
-- **Note Service** - Note CRUD operations, tagging, full-text search
-- **Link Service** - Asynchronous link suggestion generation and review
-- **Graph Service** - Knowledge graph API with tag filtering
-- **Shared Module** - Common models, auth utilities, event contracts
-
-### Frontend
-- **Next.js 15** + **React 19** - Modern App Router architecture
-- **TypeScript** - Full type safety
-- **Force-Directed Graph** - Interactive visualization with react-force-graph-2d
-
-### Infrastructure
-- **PostgreSQL 15** - Primary database with full-text search
-- **Redis 7** - Event streaming and caching
-- **Traefik** - Reverse proxy with routing
-- **GitHub Actions** - CI/CD pipeline
-
----
-
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
-- **Docker** & **Docker Compose** (for containerized setup)
-- **Node.js 22+** (for local frontend development)
-- **Python 3.12+** (for local backend development)
 
-### 1. Clone and Setup
+- **Docker & Docker Compose** (recommended for quickest setup)
+- OR manually: Node.js 18+, Python 3.12+, PostgreSQL 14+
 
+### Docker Setup (Recommended)
+
+1. **Clone the repository:**
 ```bash
-git clone https://github.com/rohittudu-epam/claude-capstone.git
+git clone <repository-url>
 cd claude-capstone
+```
 
-# Copy environment template
+2. **Copy environment file:**
+```bash
 cp .env.example .env
-
-# Generate production JWT secret (for production only)
-openssl rand -hex 32
-# Update JWT_SECRET_KEY in .env
+# Edit .env if needed (defaults work for local development)
 ```
 
-### 2. Start with Docker Compose
-
+3. **Start the stack:**
 ```bash
-docker compose up -d
+docker compose up --build
 ```
 
-This starts:
-- Backend services (ports 8001-8004)
-- PostgreSQL (port 5432)
-- Redis (port 6379)
-- Traefik (port 80)
-- Frontend (port 3000)
+This will:
+- Start PostgreSQL and Redis
+- Run database migrations
+- **Automatically seed demo data** (18 sample notes, links, suggestions)
+- Start all backend microservices
+- Start the frontend
 
-### 3. Access the Application
+4. **Access the app:**
 
-- **Frontend:** http://localhost:3000
-- **API Gateway:** http://localhost/api
-- **Health Check:** http://localhost/api/auth/health
+Open **http://localhost:3000** in your browser.
 
-### 4. First Time Setup
+**Demo Login (seeded automatically):**
+- Email: `demo@linknote.local`
+- Password: `demo123456`
 
+The demo account includes:
+- **18 realistic notes** across AI, software testing, and productivity topics
+- **Interconnected knowledge graph** with accepted links
+- **Pending suggestions** to approve or reject
+- **Tagged organization** for filtering and discovery
+
+5. **Verify everything works:**
 ```bash
-# Run database migrations
-docker compose exec auth-service alembic upgrade head
-
-# Verify deployment
-./scripts/verify-deployment.sh
+npm run smoke
 ```
 
----
+This runs automated checks:
+- ✅ Frontend serves on port 3000
+- ✅ All backend services are healthy
+- ✅ Demo login succeeds
+- ✅ Seed data is present (notes, links, suggestions)
 
-## 📚 Documentation
+### Reset and Re-Seed
 
-### Getting Started
-- [Setup and Usage Guide](docs/setup-and-usage.md) - Complete installation and configuration
-- [Getting Started](docs/getting-started.md) - First steps with LinkNote
-- [Deployment Guide](docs/deployment.md) - Production deployment instructions
-
-### Architecture & Design
-- [System Architecture](architecture.md) - High-level system design
-- [Design Review](design-review.md) - Architecture decisions and risk analysis
-- [Database Schema](docs/database.md) - Data model and migrations
-- [API Documentation](docs/api/) - OpenAPI specifications
-
-### Development
-- [Implementation Plan](impl-plan.md) - 28 dependency-ordered tasks
-- [Implementation Notes](docs/implementation-notes.md) - Deviations and decisions
-- [Testing Guide](docs/testing.md) - Running and writing tests
-- [Code Review Report](code-review.md) - Quality analysis
-- [Verification Report](verification-report.md) - Test results and traceability
-
-### SDLC Pipeline
-- [SDLC Workflow](docs/sdlc-workflow.md) - How the pipeline works
-- [Orchestrator Design](docs/orchestrator-design.md) - Agent coordination
-- [Agent Inventory](docs/agent-inventory.md) - Specialist agent specs
-- [Traceability Mapping](docs/traceability-mapping.md) - Requirements to code
-
----
-
-## 🧪 Testing
-
-### Run All Tests
+To start fresh:
 
 ```bash
-# Backend tests (in Docker)
-docker compose exec auth-service pytest
+# Stop and remove volumes
+docker compose down -v
 
-# Frontend tests
-cd frontend && npm test
-
-# E2E tests
-cd frontend && npm run test:e2e
+# Restart (re-seeds automatically)
+docker compose up --build
 ```
 
-### Test Coverage
-
-- **Backend:** 241 tests (unit + integration)
-- **Frontend:** 89 tests (component + API)
-- **E2E:** 12 tests (Playwright)
-- **Total:** 342 tests with 99.7% pass rate
-
----
-
-## 📊 Performance Metrics
-
-| Metric | Target | Achieved | Improvement |
-|--------|--------|----------|-------------|
-| Search p95 | 500ms | 27-59ms | **6-18x better** |
-| Graph API p95 | 1000ms | 95ms | **10x better** |
-| Graph Render (500 nodes) | 2s | 0.64-1.7s | **Within target** |
-
----
-
-## 🛠️ Technology Stack
-
-### Backend
-- **Python 3.12** - Primary language
-- **FastAPI** - Modern web framework
-- **SQLAlchemy 2.0** - ORM with async support
-- **Alembic** - Database migrations
-- **Pydantic** - Data validation
-- **Redis** - Streaming and caching
-- **pytest** - Testing framework
-
-### Frontend
-- **TypeScript 5.x** - Type-safe JavaScript
-- **Next.js 15** - React framework
-- **React 19** - UI library
-- **React Force Graph 2D** - Graph visualization
-- **Tailwind CSS** - Utility-first styling
-- **Vitest** - Unit testing
-- **Playwright** - E2E testing
-
-### DevOps
-- **Docker** - Containerization
-- **Docker Compose** - Multi-container orchestration
-- **GitHub Actions** - CI/CD
-- **Traefik** - Reverse proxy
-- **ruff** - Fast Python linter/formatter
-- **mypy** - Static type checking
-
----
-
-## 🤖 Agentic SDLC Pipeline
-
-This project was built using an innovative **8-stage Agentic SDLC Pipeline** that orchestrates specialized AI agents:
-
-1. **Requirements Agent** - Elicits and clarifies requirements from user stories
-2. **Architecture Agent** - Designs system architecture
-3. **Design Review Agent** - Identifies risks and improvement opportunities
-4. **Implementation Planning Agent** - Creates dependency-ordered task breakdown
-5. **Implementation Agent** - Writes production code
-6. **Review Agent** - Conducts structured code review
-7. **Verification Agent** - Generates and runs comprehensive tests
-8. **PR Agent** - Assembles production-ready Pull Requests
-
-**Learn More:** See [docs/sdlc-workflow.md](docs/sdlc-workflow.md) for details on running the pipeline.
-
----
-
-## 🔐 Security
-
-- **Password Hashing** - bcrypt with 12 rounds
-- **JWT Tokens** - Signed with HS256
-- **Token Revocation** - Database-backed revocation list
-- **Refresh Token Rotation** - One-time use refresh tokens
-- **Secure Cookies** - httpOnly, sameSite=strict
-- **Input Validation** - Pydantic schemas on all endpoints
-- **SQL Injection Prevention** - Parameterized ORM queries
-- **Secret Redaction** - Structured logging excludes sensitive data
-- **HTTPS Enforcement** - Production requires TLS
-
-**Security Review:** See [code-review.md](code-review.md) for complete security analysis.
-
----
-
-## 🐛 Known Limitations
-
-- **E2E Test Timing Issue:** One Playwright test has intermittent failures (non-critical)
-- **npm Dev Dependencies:** 2 vulnerabilities in development-only packages
-- **Not Yet Implemented:** Password reset, bulk operations, real-time collaboration
-- **Not Verified:** TLS with real certificates, E2E tests in CI
-
-See [pr-description.md](pr-description.md) for complete details.
-
----
-
-## 📝 Requirements Coverage
-
-### User Stories: 14/14 ✅
-US-01 through US-14 fully implemented
-
-### Functional Requirements: 15/15 ✅
-- FR-1: User Registration & Authentication ✅
-- FR-2: Session Management ✅
-- FR-3: Note CRUD Operations ✅
-- FR-4: Markdown Support ✅
-- FR-5: Tag Management ✅
-- FR-6: Full-Text Search ✅
-- FR-7: Event-Driven Architecture ✅
-- FR-8: Link Suggestion Generation ✅
-- FR-9: Link Approval Workflow ✅
-- FR-10: Bidirectional Links ✅
-- FR-11: Graph API ✅
-- FR-12: Web Interface ✅
-- FR-13: Graph Visualization ✅
-- FR-14: Tag Filtering ✅
-- FR-15: End-to-End Testing ✅
-
-### Non-Functional Requirements: 9/9 ✅
-- NFR-1: Performance (exceeds targets) ✅
-- NFR-2: Scalability (10k notes/user) ✅
-- NFR-3: Security (all measures verified) ✅
-- NFR-4: Data Isolation (cross-user isolation) ✅
-- NFR-5: Observability (structured logging) ✅
-- NFR-6: Deployability (Docker Compose) ✅
-- NFR-7: Testability (342 tests) ✅
-- NFR-8: Maintainability (complete docs) ✅
-- NFR-9: Accessibility (WCAG 2.1 A/AA) ✅
-
-**Full Traceability:** See [verification-report.md](verification-report.md)
-
----
-
-## 🤝 Contributing
-
-This is a demonstration project showcasing the Agentic SDLC Pipeline. Contributions are welcome!
-
-### Development Setup
+Or use the convenience command:
 
 ```bash
-# Backend development
+npm run seed:reset
+```
+
+### Disable Auto-Seeding
+
+Set `SEED_ON_START=false` in `.env` to disable automatic seeding on startup.
+
+### Manual Development Setup (without Docker)
+
+If you prefer local development without Docker:
+
+1. **Install dependencies:**
+```bash
+# Frontend
+cd frontend && npm install && cd ..
+
+# Backend (in virtual environment)
 cd backend
-python -m venv venv
-source venv/bin/activate  # or `venv\Scripts\activate` on Windows
-pip install -r requirements-dev.txt
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+cd ..
+```
 
-# Frontend development
+2. **Start PostgreSQL and Redis** (via Docker or locally)
+
+3. **Run migrations:**
+```bash
+cd backend
+alembic upgrade head
+cd ..
+```
+
+4. **Seed demo data:**
+```bash
+npm run seed
+# Or with custom credentials:
+python scripts/seed-data.py --email user@example.com --password mypass
+```
+
+5. **Start services:**
+```bash
+# Terminal 1: Backend services
+cd backend
+uvicorn auth_service.main:app --reload --port 8001 &
+uvicorn note_service.main:app --reload --port 8002 &
+uvicorn link_service.main:app --reload --port 8003 &
+uvicorn graph_service.main:app --reload --port 8004 &
+
+# Terminal 2: Frontend
 cd frontend
-npm install
 npm run dev
 ```
 
-### Code Quality
+6. **Access:** http://localhost:3000
 
-```bash
-# Backend linting and formatting
-cd backend
-ruff check .
-ruff format .
-mypy .
+## Project Structure
 
-# Frontend linting and type checking
-cd frontend
-npm run lint
-npm run typecheck
+```
+claude-capstone/
+├── frontend/          # Next.js 15 + React 19 + TypeScript
+│   ├── src/
+│   │   ├── app/       # Next.js app router
+│   │   ├── components/ # React components
+│   │   └── lib/       # Utilities and API client
+│   └── package.json
+├── backend/           # Python microservices
+│   ├── auth-service/  # User authentication
+│   ├── note-service/  # Notes CRUD
+│   ├── link-service/  # Link suggestions
+│   ├── graph-service/ # Knowledge graph
+│   └── shared/        # Shared models and seed utilities
+├── scripts/           # Utility scripts
+│   ├── seed-data.py   # Populate with sample data
+│   └── smoke-test.sh  # Automated smoke tests
+└── docs/              # Documentation
 ```
 
----
+## Configuration
 
-## 📄 License
+### Environment Variables
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Key variables in `.env`:
 
----
+```bash
+# Frontend
+FRONTEND_PORT=3000                         # Port for frontend (default: 3000)
+NEXT_PUBLIC_API_BASE_URL=http://localhost  # API base URL for browser
 
-## 🙏 Acknowledgments
+# Seed Data
+SEED_ON_START=true                          # Auto-seed on docker compose up
+SEED_DEMO_EMAIL=demo@linknote.local         # Demo account email
+SEED_DEMO_PASSWORD=demo123456               # Demo account password (dev only!)
 
-- Built with [Claude Code](https://claude.ai/code) - AI-powered development assistant
-- Powered by [Anthropic's Claude](https://www.anthropic.com/) - Advanced AI capabilities
-- Demonstrates the **Agentic SDLC Pipeline** methodology
+# Database
+POSTGRES_USER=linknote
+POSTGRES_PASSWORD=linknote_password
+POSTGRES_DB=linknote
 
----
+# Authentication
+JWT_SECRET_KEY=your-secret-here             # Generate: openssl rand -hex 32
+COOKIE_SECURE=false                         # Set true for HTTPS in production
 
-## 📞 Contact
+# Link Suggestions
+LINK_SUGGESTION_THRESHOLD=0.30              # Similarity threshold (0-1)
+LINK_SUGGESTION_MIN_SHARED_KEYWORDS=2       # Minimum shared keywords
+LINK_SUGGESTION_MAX_PER_NOTE=10             # Max suggestions per note
+```
 
-**Project:** LinkNote MVP  
-**Repository:** https://github.com/rohittudu-epam/claude-capstone  
-**Documentation:** [docs/](docs/)
+### Changing the Frontend Port
 
----
+Edit `.env`:
+```bash
+FRONTEND_PORT=4000
+```
 
-**Built with the Agentic SDLC Pipeline** 🤖  
-From user stories to production-ready code in 8 automated stages.
+Then restart:
+```bash
+docker compose up -d frontend
+```
+
+Access at **http://localhost:4000**
+
+## Development Scripts
+
+### Seed Data
+```bash
+# Seed with default demo account
+npm run seed
+
+# Seed with custom credentials
+npm run seed:custom -- --email user@example.com --password mypass
+
+# Reset database and re-seed
+npm run seed:reset
+
+# Smoke test (verify seed worked)
+npm run smoke
+```
+
+The seed script is **idempotent** — safe to run multiple times without creating duplicates.
+
+### Frontend
+```bash
+cd frontend
+npm run dev          # Start dev server
+npm run build        # Production build
+npm run lint         # Run ESLint
+npm run typecheck    # Type check with TypeScript
+npm test             # Run unit tests
+npm run e2e          # Run E2E tests
+```
+
+### Backend
+```bash
+cd backend
+pytest               # Run all tests
+pytest -v            # Verbose output
+ruff check .         # Lint Python code
+mypy .               # Type check Python
+```
+
+### Full Stack
+```bash
+# Run smoke test to verify the entire stack
+npm run smoke
+
+# Build production images
+docker compose build
+
+# View logs
+docker compose logs -f [service-name]
+
+# Stop everything
+docker compose down
+
+# Stop and remove all data
+docker compose down -v
+```
+
+## Seed Data Details
+
+The automatic seed creates:
+
+### Demo Account
+- **Email:** `demo@linknote.local` (configurable via `SEED_DEMO_EMAIL`)
+- **Password:** `demo123456` (configurable via `SEED_DEMO_PASSWORD`)
+- ⚠️ **Never use default credentials in production!**
+
+### Sample Notes (18 total)
+
+**Cluster 1: AI & Machine Learning (5 notes)**
+- Understanding Artificial Intelligence
+- Machine Learning in Automation
+- Neural Networks Basics
+- Prompt Engineering Tips
+- AI Ethics and Bias
+
+Tags: `ai`, `machine-learning`, `automation`, `deep-learning`, `llm`, `ethics`
+
+**Cluster 2: Software Testing (5 notes)**
+- AI-Powered Software Testing
+- Selenium vs Playwright
+- Writing Reliable Test Cases
+- API Testing with REST Assured
+- Test Pyramid Strategy
+
+Tags: `software-testing`, `automation`, `qa`, `api`, `selenium`, `playwright`
+
+**Cluster 3: Productivity & Learning (3 notes)**
+- Spaced Repetition for Learning
+- Weekly Review Template
+- Zettelkasten Method
+
+Tags: `productivity`, `learning`, `note-taking`, `knowledge-management`
+
+**Bridge Notes (connect clusters):**
+- Automated Testing ROI (Testing + ML)
+- Learning New Programming Languages (Learning + Programming)
+
+**Isolated Notes (for testing):**
+- Hello World
+- Another Text
+
+### Pre-populated Features
+
+- **13+ accepted links** between related notes (visible in Graph)
+- **1 rejected suggestion** (for testing reject flow)
+- **Timestamps** spread over last 30 days (realistic sorting)
+- **Rich Markdown** formatting (code blocks, lists, headings, blockquotes)
+- **Cross-cluster connections** (shows knowledge graph strength)
+
+### Verification
+
+After seeding, the Graph page should show:
+- Multiple connected clusters
+- Cross-cluster bridge connections
+- Two isolated nodes (Hello World, Another Text)
+- Accepted link edges
+
+The Suggestions page should show:
+- Pending suggestions based on keyword overlap
+- Scores and shared keywords
+
+## Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| Port 3000 already in use | Change `FRONTEND_PORT` in `.env` or stop the other process |
+| "Connection refused" from frontend | Wait for backend services to be healthy (check `docker compose ps`) |
+| Seed service fails | Check `docker compose logs seed` for details; ensure migrations ran |
+| No suggestions appearing | Suggestions are generated by background worker; check `docker compose logs link-worker` |
+| Tests not running | Ensure test framework installed: `cd backend && pip install -r requirements-dev.txt` |
+| Login fails | Verify `COOKIE_SECURE=false` in `.env` for local HTTP development |
+| Graph shows no connections | Links require two notes with shared tags/keywords; check seed logs |
+
+### Health Check URLs
+
+- Frontend: http://localhost:3000
+- Auth Service: http://localhost:8001/health
+- Note Service: http://localhost:8002/health
+- Link Service: http://localhost:8003/health
+- Graph Service: http://localhost:8004/health
+- Traefik Dashboard: http://localhost:8080 (when `with-proxy` profile active)
+
+### Logs
+
+```bash
+# All services
+docker compose logs -f
+
+# Specific service
+docker compose logs -f auth-service
+docker compose logs -f frontend
+docker compose logs -f seed
+
+# Last 100 lines
+docker compose logs --tail=100 link-worker
+```
+
+## Documentation
+
+See `docs/` for detailed documentation on architecture, API design, and development guidelines.

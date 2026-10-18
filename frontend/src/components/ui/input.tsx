@@ -7,8 +7,9 @@ export const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttribute
       type={type}
       className={cn(
         "flex h-10 w-full rounded-lg border border-border-strong bg-bg-elevated px-3 py-2 text-sm text-text-primary",
-        "placeholder:text-text-muted",
-        "focus-visible:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-soft",
+        "placeholder:text-text-secondary",
+        "focus-visible:border-accent focus-visible:shadow-[0_0_0_3px_rgba(255,90,54,0.25)] focus-visible:outline-none",
+        "aria-[invalid=true]:border-danger",
         "disabled:cursor-not-allowed disabled:opacity-50",
         "transition-all duration-150 ease-out",
         className,
@@ -25,9 +26,10 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, React.TextareaHTML
   return (
     <textarea
       className={cn(
-        "flex min-h-[120px] w-full rounded-lg border border-border-strong bg-bg-elevated px-3 py-2 text-sm text-text-primary",
-        "placeholder:text-text-muted",
-        "focus-visible:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-soft",
+        "flex min-h-[280px] w-full rounded-lg border border-border-strong bg-bg-elevated px-3 py-3 text-sm leading-relaxed text-text-primary",
+        "placeholder:text-text-secondary",
+        "focus-visible:border-accent focus-visible:shadow-[0_0_0_3px_rgba(255,90,54,0.25)] focus-visible:outline-none",
+        "aria-[invalid=true]:border-danger",
         "disabled:cursor-not-allowed disabled:opacity-50",
         "transition-all duration-150 ease-out",
         "resize-y font-mono",

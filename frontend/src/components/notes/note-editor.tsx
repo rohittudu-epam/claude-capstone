@@ -8,7 +8,7 @@ import { Markdown } from "@/components/notes/markdown";
 import { TagInput } from "@/components/notes/tag-input";
 import { Button } from "@/components/ui/button";
 import { describeError } from "@/components/ui/feedback";
-import { Field, Input, Textarea } from "@/components/ui/field";
+import { Input, Label, Textarea } from "@/components/ui/field";
 import { useToast } from "@/components/ui/toast";
 import { ApiError, api } from "@/lib/api";
 import type { Note } from "@/lib/types";
@@ -18,6 +18,10 @@ const MAX_TITLE_LENGTH = 500;
 const MAX_BODY_BYTES = 512 * 1024;
 
 type Errors = { title?: string; body?: string; tags?: string };
+
+function countWords(text: string): number {
+  return text.trim().split(/\s+/).filter(Boolean).length;
+}
 
 export function NoteEditor({ note }: { note?: Note }) {
   const router = useRouter();
@@ -32,7 +36,8 @@ export function NoteEditor({ note }: { note?: Note }) {
   const [saving, setSaving] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const submitting = useRef(false); // synchronous guard: state updates are too late to stop a double click
+  const [titleTouched, setTitleTouched] = useState(false);
+  const submitting = useRef(false);
   const titleRef = useRef<HTMLInputElement>(null);
   const toast = useToast();
 
@@ -44,6 +49,8 @@ export function NoteEditor({ note }: { note?: Note }) {
     ? title !== note.title || body !== note.body || tags.join("\n") !== note.tags.join("\n")
     : Boolean(title || body || tags.length);
 
+  const wordCount = countWords(body);
+
   function cancel() {
     if (dirty && !window.confirm("Discard your changes?")) return;
     router.push("/notes");
@@ -53,6 +60,21 @@ export function NoteEditor({ note }: { note?: Note }) {
     if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
       event.preventDefault();
       event.currentTarget.requestSubmit();
+    }
+  }
+
+  // Handle tab switching with arrow keys
+  function onTabKeyDown(event: KeyboardEvent<HTMLButtonElement>, tabValue: "write" | "preview") {
+    if (event.key === "ArrowRight") {
+      event.preventDefault();
+      setMode(tabValue === "write" ? "preview" : "write");
+      const next = event.currentTarget.nextElementSibling as HTMLButtonElement | null;
+      next?.focus();
+    } else if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      setMode(tabValue === "write" ? "preview" : "write");
+      const prev = event.currentTarget.previousElementSibling as HTMLButtonElement | null;
+      prev?.focus();
     }
   }
 
@@ -67,10 +89,10 @@ export function NoteEditor({ note }: { note?: Note }) {
 
   function validate(): Errors {
     const next: Errors = {};
-    if (!title.trim()) next.title = "Give the note a title.";
-    else if (title.trim().length > MAX_TITLE_LENGTH) next.title = `The title can be at most ${MAX_TITLE_LENGTH} characters.`;
+    if (!title.trim()) next.title = "Give your note a title";
+    else if (title.trim().length > MAX_TITLE_LENGTH) next.title = `The title can be at most ${MAX_TITLE_LENGTH} characters`;
     if (new TextEncoder().encode(body).length > MAX_BODY_BYTES) {
-      next.body = `The note is too long (limit ${MAX_BODY_BYTES / 1024} KiB).`;
+      next.body = `The note is too long (limit ${MAX_BODY_BYTES / 1024} KiB)`;
     }
     return next;
   }
@@ -84,6 +106,8 @@ export function NoteEditor({ note }: { note?: Note }) {
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
     if (submitting.current) return;
+
+    setTitleTouched(true);
     const next = validate();
     setErrors(next);
     setFormError(null);
@@ -102,7 +126,7 @@ export function NoteEditor({ note }: { note?: Note }) {
       } else {
         toast.success("Note created");
         router.push("/notes");
-        return; // stay locked while navigating away, so a late second click can't create a duplicate
+        return;
       }
     } catch (error) {
       if (error instanceof ApiError && error.status === 400 && error.fieldErrors.length > 0) {
@@ -136,20 +160,50 @@ export function NoteEditor({ note }: { note?: Note }) {
     }
   }
 
+  const titleError = titleTouched ? errors.title : undefined;
+  const canSubmit = !saving && title.trim().length > 0;
+
   return (
-    <form onSubmit={onSubmit} onKeyDown={onKeyDown} noValidate className="space-y-4" aria-label={note ? "Edit note" : "New note"}>
-      {formError ? (
-        <p role="alert" className="rounded-md border border-danger bg-surface p-3 text-sm text-danger">
+    <form onSubmit={onSubmit} onKeyDown={onKeyDown} noValidate className="space-y-5" aria-label={note ? "Edit note" : "New note"}>
+      {formError && (
+        <div role="alert" className="rounded-lg border border-danger/30 bg-danger/10 p-3 text-sm text-danger">
           {formError}
-        </p>
-      ) : null}
+        </div>
+      )}
 
-      <Field id="title" label="Title" error={errors.title}>
-        {(props) => (
-          <Input {...props} ref={titleRef} value={title} onChange={(e) => edited(setTitle)(e.target.value)} maxLength={MAX_TITLE_LENGTH + 50} />
+      {/* Title Field */}
+      <div>
+        <Label htmlFor="title">Title</Label>
+        <Input
+          id="title"
+          ref={titleRef}
+          value={title}
+          onChange={(e) => {
+            edited(setTitle)(e.target.value);
+            if (titleTouched) {
+              const next = validate();
+              setErrors((prev) => ({ ...prev, title: next.title }));
+            }
+          }}
+          onBlur={() => {
+            setTitleTouched(true);
+            const next = validate();
+            setErrors((prev) => ({ ...prev, title: next.title }));
+          }}
+          maxLength={MAX_TITLE_LENGTH + 50}
+          placeholder="Untitled note"
+          aria-invalid={Boolean(titleError)}
+          aria-describedby={titleError ? "title-error" : undefined}
+          className="text-lg"
+        />
+        {titleError && (
+          <p id="title-error" className="mt-1.5 text-sm text-danger">
+            {titleError}
+          </p>
         )}
-      </Field>
+      </div>
 
+      {/* Tags Field */}
       <TagInput
         value={tags}
         onChange={edited(setTags)}
@@ -157,69 +211,103 @@ export function NoteEditor({ note }: { note?: Note }) {
         error={errors.tags}
       />
 
+      {/* Editor Section */}
       <div>
-        <div className="mb-1 flex items-center justify-between">
-          <span className="text-sm font-medium" id="body-label">
-            Note (Markdown)
-          </span>
-          <div role="group" aria-label="Editor mode" className="flex rounded-md border border-border">
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
+          <Label id="body-label">Note</Label>
+          <div role="tablist" aria-label="Editor mode" className="flex rounded-lg border border-border-strong overflow-hidden">
             {(["write", "preview"] as const).map((value) => (
               <button
                 key={value}
                 type="button"
-                aria-pressed={mode === value}
+                role="tab"
+                aria-selected={mode === value}
+                aria-controls={`${value}-panel`}
                 onClick={() => setMode(value)}
-                className={cn("px-3 py-1 text-sm capitalize", mode === value ? "bg-brand text-brand-foreground" : "bg-surface")}
+                onKeyDown={(e) => onTabKeyDown(e, value)}
+                tabIndex={mode === value ? 0 : -1}
+                className={cn(
+                  "px-4 py-1.5 text-sm font-medium capitalize transition-all duration-150",
+                  mode === value
+                    ? "bg-accent-soft text-accent"
+                    : "bg-bg-surface text-text-secondary hover:bg-bg-hover hover:text-text-primary",
+                )}
               >
                 {value}
               </button>
             ))}
           </div>
         </div>
+
         {mode === "write" ? (
-          <Field id="body" label="Markdown text" error={errors.body}>
-            {(props) => (
-              <Textarea {...props} value={body} onChange={(e) => edited(setBody)(e.target.value)} />
+          <div id="write-panel" role="tabpanel" aria-labelledby="body-label">
+            <Textarea
+              id="body"
+              value={body}
+              onChange={(e) => edited(setBody)(e.target.value)}
+              placeholder="Write in Markdown..."
+              aria-label="Note content, Markdown"
+              aria-invalid={Boolean(errors.body)}
+              aria-describedby={errors.body ? "body-error" : "word-count"}
+            />
+            <div className="mt-1.5 flex items-center justify-between text-xs text-text-muted">
+              <span id="word-count">{wordCount} {wordCount === 1 ? "word" : "words"}</span>
+            </div>
+            {errors.body && (
+              <p id="body-error" className="mt-1.5 text-sm text-danger">
+                {errors.body}
+              </p>
             )}
-          </Field>
+          </div>
         ) : (
-          <div aria-label="Preview" className="min-h-64 rounded-md border border-border bg-surface p-4">
-            {body.trim() ? <Markdown>{body}</Markdown> : <p className="text-ink-soft">Nothing to preview yet.</p>}
+          <div
+            id="preview-panel"
+            role="tabpanel"
+            aria-labelledby="body-label"
+            className="min-h-[280px] rounded-lg border border-border-subtle bg-bg-elevated p-4"
+          >
+            {body.trim() ? <Markdown>{body}</Markdown> : <p className="text-text-muted">Nothing to preview yet</p>}
           </div>
         )}
       </div>
 
-      {note ? (
-        <p className="text-xs text-ink-soft">
+      {note && (
+        <p className="text-xs text-text-secondary">
           Created <time dateTime={note.created_at}>{formatDate(note.created_at)}</time> · Updated{" "}
           <time dateTime={note.updated_at}>{formatDate(note.updated_at)}</time>
         </p>
-      ) : null}
+      )}
 
-      <div className="flex flex-wrap items-center gap-3">
-        <Button type="submit" disabled={saving}>
-          {saving ? "Saving…" : note ? "Save changes" : "Create note"}
-        </Button>
-        <Button variant="secondary" disabled={saving} onClick={cancel}>
-          Cancel
-        </Button>
-        {saved ? <span role="status">Saved.</span> : null}
-        {note && !confirmingDelete ? (
-          <Button variant="secondary" className="ml-auto" onClick={() => setConfirmingDelete(true)}>
-            Delete
+      {/* Actions - Sticky on mobile */}
+      <div className="fixed bottom-0 left-0 right-0 z-20 border-t border-border-subtle bg-bg-surface p-4 shadow-lg sm:static sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none">
+        <div className="flex flex-wrap items-center gap-3">
+          <Button type="submit" disabled={!canSubmit} loading={saving} className="flex-1 sm:flex-initial">
+            {note ? "Save changes" : "Create note"}
           </Button>
-        ) : null}
-        {note && confirmingDelete ? (
-          <div role="alertdialog" aria-label="Confirm delete" className="ml-auto flex items-center gap-2">
-            <span className="text-sm">Delete this note? This cannot be undone.</span>
-            <Button variant="danger" size="sm" disabled={deleting} onClick={onDelete}>
-              {deleting ? "Deleting…" : "Yes, delete"}
+          <Button variant="ghost" disabled={saving} onClick={cancel} className="flex-1 sm:flex-initial">
+            Cancel
+          </Button>
+          {saved && <span role="status" className="hidden text-sm text-success sm:inline">Saved</span>}
+          {note && !confirmingDelete && (
+            <Button variant="secondary" className="ml-auto hidden sm:inline-flex" onClick={() => setConfirmingDelete(true)}>
+              Delete
             </Button>
-            <Button variant="secondary" size="sm" disabled={deleting} onClick={() => setConfirmingDelete(false)}>
-              Cancel
-            </Button>
-          </div>
-        ) : null}
+          )}
+          {note && confirmingDelete && (
+            <div role="alertdialog" aria-label="Confirm delete" className="ml-auto flex flex-wrap items-center gap-2">
+              <span className="text-sm text-text-secondary">Delete this note? This cannot be undone.</span>
+              <Button variant="danger" size="sm" disabled={deleting} onClick={onDelete}>
+                {deleting ? "Deleting…" : "Yes, delete"}
+              </Button>
+              <Button variant="secondary" size="sm" disabled={deleting} onClick={() => setConfirmingDelete(false)}>
+                Cancel
+              </Button>
+            </div>
+          )}
+        </div>
+        <p className="mt-2 text-xs text-text-muted sm:mt-3">
+          <kbd className="key-cap">Ctrl</kbd>+<kbd className="key-cap">Enter</kbd> to save
+        </p>
       </div>
     </form>
   );

@@ -1,0 +1,26 @@
+{
+  "name": "linknote",
+  "version": "1.0.0",
+  "description": "Markdown notes with smart link suggestions",
+  "private": true,
+  "scripts": {
+    "seed": "python scripts/seed-data.py --email demo@linknote.local --password demo123456",
+    "seed:custom": "python scripts/seed-data.py",
+    "seed:reset": "echo 'Resetting database...' && docker compose down -v && docker compose up -d postgres redis && sleep 3 && docker compose up migrate seed",
+    "smoke": "bash scripts/smoke-test.sh",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && ./scripts/dev-all.sh",
+    "build:frontend": "cd frontend && npm run build",
+    "lint:frontend": "cd frontend && npm run lint",
+    "test:frontend": "cd frontend && npm test",
+    "test:backend": "cd backend && pytest"
+  },
+  "keywords": [
+    "notes",
+    "markdown",
+    "knowledge-graph",
+    "zettelkasten"
+  ],
+  "author": "",
+  "license": "MIT"
+}

@@ -17,6 +17,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY shared ./shared
 COPY alembic.ini ./
 COPY migrations ./migrations
+COPY scripts ./scripts
 COPY ${SERVICE}/ ./
 
 RUN useradd --system --uid 10001 app && chown -R app /app
