@@ -10,31 +10,31 @@ This mapping traces every responsibility from the source document (GitHub Copilo
 |-------------------|---------------|------|
 | Read a new User Story from JIRA/Confluence/word document | Requirements Agent reads from file or inline text | `.claude/agents/requirements-agent.md` §1 |
 | Let Copilot ask or clarify questions and let user respond | Requirements Agent conducts interactive clarification rounds (max 2) | `.claude/agents/requirements-agent.md` §2 |
-| Capture final requirements in requirements.md | Requirements Agent generates and writes `requirements.md` | `.claude/agents/requirements-agent.md` §3 |
+| Capture final requirements in docs/requirements.md | Requirements Agent generates and writes `docs/requirements.md` | `.claude/agents/requirements-agent.md` §3 |
 | Commit the file | Requirements Agent runs `git add` and `git commit` | `.claude/agents/requirements-agent.md` §5 |
 
 ### Step 2: Architecture
 
 | Source Requirement | Implementation | File |
 |-------------------|---------------|------|
-| Ask for architecture recommendation based on requirements.md | Architecture Agent reads `requirements.md` and proposes design | `.claude/agents/architecture-agent.md` §1-2 |
-| Document proposed architecture in architecture.md | Architecture Agent writes `architecture.md` | `.claude/agents/architecture-agent.md` §3 |
+| Ask for architecture recommendation based on docs/requirements.md | Architecture Agent reads `docs/requirements.md` and proposes design | `.claude/agents/architecture-agent.md` §1-2 |
+| Document proposed architecture in docs/architecture.md | Architecture Agent writes `docs/architecture.md` | `.claude/agents/architecture-agent.md` §3 |
 | Identify key components and their responsibilities | Architecture Agent includes Components section with responsibilities | `.claude/agents/architecture-agent.md` §2-3 |
 
 ### Step 3: Design Review
 
 | Source Requirement | Implementation | File |
 |-------------------|---------------|------|
-| Share architecture.md and identify risks and gaps | Design Review Agent evaluates across 9 dimensions | `.claude/agents/design-review-agent.md` §2 |
-| Document review findings and agreed decisions in design-review.md | Design Review Agent writes `design-review.md` | `.claude/agents/design-review-agent.md` §3 |
-| Update architecture.md if issues found | Design Review Agent edits `architecture.md` for Critical/High findings | `.claude/agents/design-review-agent.md` §4 |
+| Share docs/architecture.md and identify risks and gaps | Design Review Agent evaluates across 9 dimensions | `.claude/agents/design-review-agent.md` §2 |
+| Document review findings and agreed decisions in docs/design-review.md | Design Review Agent writes `docs/design-review.md` | `.claude/agents/design-review-agent.md` §3 |
+| Update docs/architecture.md if issues found | Design Review Agent edits `docs/architecture.md` for Critical/High findings | `.claude/agents/design-review-agent.md` §4 |
 
 ### Step 4: Implementation Planning
 
 | Source Requirement | Implementation | File |
 |-------------------|---------------|------|
-| Generate task breakdown from architecture.md | Impl Planning Agent decomposes architecture into tasks | `.claude/agents/impl-planning-agent.md` §2 |
-| Document plan in impl-plan.md ordered by dependency | Impl Planning Agent writes `impl-plan.md` with dependency ordering | `.claude/agents/impl-planning-agent.md` §3-4 |
+| Generate task breakdown from docs/architecture.md | Impl Planning Agent decomposes architecture into tasks | `.claude/agents/impl-planning-agent.md` §2 |
+| Document plan in docs/impl-plan.md ordered by dependency | Impl Planning Agent writes `docs/impl-plan.md` with dependency ordering | `.claude/agents/impl-planning-agent.md` §3-4 |
 | Identify blocked tasks | Impl Planning Agent includes Blocked Tasks table | `.claude/agents/impl-planning-agent.md` §3-4 |
 
 ### Step 5: Implementation

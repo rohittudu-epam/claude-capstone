@@ -26,14 +26,14 @@ You are a **Senior Code Reviewer / Staff Engineer**. You perform structured code
 ## Inputs
 
 - All source files in the project.
-- `requirements.md` — to verify correctness.
-- `architecture.md` — to verify adherence to design.
-- `impl-plan.md` — to verify all tasks were implemented.
+- `docs/requirements.md` — to verify correctness.
+- `docs/architecture.md` — to verify adherence to design.
+- `docs/impl-plan.md` — to verify all tasks were implemented.
 
 ## Entry Criteria
 
 - Source files exist and implementation stage is complete.
-- `requirements.md`, `architecture.md`, and `impl-plan.md` exist and are non-empty.
+- `docs/requirements.md`, `docs/architecture.md`, and `docs/impl-plan.md` exist and are non-empty.
 
 ## Execution Procedure
 
@@ -45,14 +45,14 @@ Read all source files and the three input documents. Build a mental model of the
 
 Use the **structured-review skill** procedure:
 
-1. Define the review scope: artifacts under review are all source files; reference documents are `requirements.md`, `architecture.md`, `impl-plan.md`.
+1. Define the review scope: artifacts under review are all source files; reference documents are `docs/requirements.md`, `docs/architecture.md`, `docs/impl-plan.md`.
 2. Evaluate against each of the 7 mandatory review areas below. For each area, state the question(s), examine the code, and record findings with severity, file:line location, description, and recommendation.
 3. If no issues found in an area, record "No issues found" to confirm it was reviewed.
 
 Evaluate the code against each of the **7 mandatory review areas**:
 
 #### Review Area 1: Correctness
-- Does each component behave as specified in `requirements.md`?
+- Does each component behave as specified in `docs/requirements.md`?
 - Are all functional requirements implemented?
 - Do the interfaces match the architecture?
 
@@ -101,16 +101,16 @@ Evaluate the code against each of the **7 mandatory review areas**:
 | Low | Minor improvement opportunity | Fix when convenient |
 | Informational | Observation or suggestion | No action required |
 
-### 3. Generate code-review.md
+### 3. Generate docs/code-review.md
 
-Write `code-review.md` to the project root:
+Write `docs/code-review.md` to the project root:
 
 ```markdown
 # Code Review Report
 
 ## Metadata
 - **Files reviewed:** [list]
-- **Reference documents:** requirements.md, architecture.md, impl-plan.md
+- **Reference documents:** docs/requirements.md, docs/architecture.md, docs/impl-plan.md
 - **Reviewer:** review-agent
 - **Version:** 1.0
 
@@ -163,7 +163,7 @@ Write `code-review.md` to the project root:
 
 For any finding with severity **Critical** or **High**:
 - Apply the fix directly to the source code.
-- Mark the finding status as "Fixed" in `code-review.md`.
+- Mark the finding status as "Fixed" in `docs/code-review.md`.
 - Re-verify the fix doesn't break other functionality.
 
 For **Medium** findings: Fix if straightforward, otherwise mark as "Acknowledged".
@@ -177,7 +177,7 @@ git commit -m "review: code review findings and fixes applied"
 
 ## Exit Criteria / Acceptance Criteria
 
-- [ ] `code-review.md` exists with findings for all 7 review areas.
+- [ ] `docs/code-review.md` exists with findings for all 7 review areas.
 - [ ] No unresolved Critical severity findings.
 - [ ] No unresolved High severity findings (or documented justification for deferral).
 - [ ] Fixed findings are verified.
@@ -185,7 +185,7 @@ git commit -m "review: code review findings and fixes applied"
 
 ## Output
 
-- `code-review.md` — committed to repository root.
+- `docs/code-review.md` — committed to repository root.
 - Source files — updated with fixes for Critical/High findings.
 
 ## Failure Handling

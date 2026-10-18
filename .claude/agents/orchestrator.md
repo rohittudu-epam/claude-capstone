@@ -53,14 +53,14 @@ Execute these stages in strict sequential order:
 
 | Stage | Agent | Input Artifacts | Output Artifacts | Quality Gate | Related Skill |
 |-------|-------|----------------|-----------------|--------------|---------------|
-| 1 | requirements-agent | User story | `requirements.md` | User confirmation | — |
-| 2 | architecture-agent | `requirements.md` | `architecture.md` | Requirements coverage | — |
-| 3 | design-review-agent | `architecture.md`, `requirements.md` | `design-review.md`, updated `architecture.md` | Risks documented | structured-review |
-| 4 | impl-planning-agent | `architecture.md`, `design-review.md` | `impl-plan.md` | Tasks cover all components | — |
-| 5 | implementation-agent | `impl-plan.md`, `architecture.md`, `requirements.md` | Source files | Human approval, builds successfully | — |
-| 6 | review-agent | Source files, `requirements.md`, `architecture.md` | `code-review.md` | No critical unresolved findings | structured-review |
-| 7 | verification-agent | Source files, `requirements.md` | Test files, `verification-report.md` | All tests pass | test-and-verify |
-| 8 | pr-agent | All artifacts | `pr-description.md`, `CHANGELOG.md` | All 5 required PR sections present | pr-assembly |
+| 1 | requirements-agent | User story | `docs/requirements.md` | User confirmation | — |
+| 2 | architecture-agent | `docs/requirements.md` | `docs/architecture.md` | Requirements coverage | — |
+| 3 | design-review-agent | `docs/architecture.md`, `docs/requirements.md` | `docs/design-review.md`, updated `docs/architecture.md` | Risks documented | structured-review |
+| 4 | impl-planning-agent | `docs/architecture.md`, `docs/design-review.md` | `docs/impl-plan.md` | Tasks cover all components | — |
+| 5 | implementation-agent | `docs/impl-plan.md`, `docs/architecture.md`, `docs/requirements.md` | Source files | Human approval, builds successfully | — |
+| 6 | review-agent | Source files, `docs/requirements.md`, `docs/architecture.md` | `docs/code-review.md` | No critical unresolved findings | structured-review |
+| 7 | verification-agent | Source files, `docs/requirements.md` | Test files, `docs/verification-report.md` | All tests pass | test-and-verify |
+| 8 | pr-agent | All artifacts | `docs/pr-description.md`, `docs/CHANGELOG.md` | All 5 required PR sections present | pr-assembly |
 
 ## Execution Protocol
 

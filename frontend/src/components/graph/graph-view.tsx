@@ -10,6 +10,7 @@ import { useMemo, useState } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Sidebar, SidebarHeader, SidebarSection, SidebarSectionLabel, SidebarHintBar } from "@/components/layout/sidebar";
 import { TagFilter } from "@/components/notes/tag-filter";
+import { Button } from "@/components/ui/button";
 import { KeyCap } from "@/components/ui/key-cap";
 import { EmptyState, ErrorNotice, Loading, describeError } from "@/components/ui/feedback";
 import { api } from "@/lib/api";
@@ -48,7 +49,7 @@ function GraphList({ graph }: { graph: Graph }) {
             )}
             <p className="mt-2 text-sm text-text-secondary">
               {linked.length === 0 ? (
-                "Not connected to other notes"
+                "Not connected to other notes."
               ) : (
                 <>
                   <span className="text-text-muted">Connected to: </span>
@@ -112,8 +113,11 @@ export function GraphView() {
                 <span className="text-text-secondary">Connections</span>
                 <span className="font-mono text-text-primary">{data.edges.length}</span>
               </div>
+              <p className="sr-only">
+                {data.nodes.length} notes, {data.edges.length} {data.edges.length === 1 ? "connection" : "connections"}
+              </p>
               {data.is_capped && (
-                <div className="mt-3 rounded-lg border border-warning/30 bg-warning/10 p-2 text-xs text-warning">
+                <div role="status" className="mt-3 rounded-lg border border-warning/30 bg-warning/10 p-2 text-xs text-warning">
                   {data.message ?? `Showing ${data.nodes.length} of ${data.total_nodes} notes`}
                 </div>
               )}
@@ -144,12 +148,12 @@ export function GraphView() {
                 <button
                   type="button"
                   aria-pressed={view === "graph"}
+                  aria-label="graph"
                   onClick={() => setView("graph")}
                   className={cn(
                     "flex items-center gap-2 px-3 py-1.5 text-sm transition-colors",
                     view === "graph" ? "bg-accent text-white" : "bg-bg-surface text-text-secondary hover:text-text-primary",
                   )}
-                  title="Graph view"
                 >
                   <Network className="h-4 w-4" strokeWidth={1.5} />
                   Graph
@@ -157,17 +161,20 @@ export function GraphView() {
                 <button
                   type="button"
                   aria-pressed={view === "list"}
+                  aria-label="list"
                   onClick={() => setView("list")}
                   className={cn(
-                    "flex items-center gap-2 px-3 py-1.5 text-sm transition-colors border-l border-border-strong",
+                    "flex items-center gap-2 border-l border-border-strong px-3 py-1.5 text-sm transition-colors",
                     view === "list" ? "bg-accent text-white" : "bg-bg-surface text-text-secondary hover:text-text-primary",
                   )}
-                  title="List view"
                 >
                   <List className="h-4 w-4" strokeWidth={1.5} />
                   List
                 </button>
               </div>
+              <Button asChild>
+                <Link href="/notes/new">+ New note</Link>
+              </Button>
             </div>
           }
         />

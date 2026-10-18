@@ -1,13 +1,13 @@
 {
   "workflow_id": "wf_linknote_mvp_20261016_reset",
   "started_at": "2026-10-16T12:00:00Z",
-  "user_story_source": "user-story-updated.md",
+  "user_story_source": "docs/user-story-updated.md",
   "stages": {
     "requirements": {
       "status": "COMPLETED",
       "agent": "requirements-agent",
       "artifacts": [
-        "requirements.md"
+        "docs/requirements.md"
       ],
       "started_at": "2026-10-16T12:00:00Z",
       "completed_at": "2026-10-16T18:48:47Z",
@@ -18,7 +18,7 @@
       "status": "COMPLETED",
       "agent": "architecture-agent",
       "artifacts": [
-        "architecture.md"
+        "docs/architecture.md"
       ],
       "started_at": null,
       "completed_at": "2026-10-16T18:48:47Z",
@@ -29,8 +29,8 @@
       "status": "COMPLETED",
       "agent": "design-review-agent",
       "artifacts": [
-        "design-review.md",
-        "architecture.md"
+        "docs/design-review.md",
+        "docs/architecture.md"
       ],
       "started_at": null,
       "completed_at": "2026-10-16T18:48:47Z",
@@ -41,7 +41,7 @@
       "status": "COMPLETED",
       "agent": "impl-planning-agent",
       "artifacts": [
-        "impl-plan.md"
+        "docs/impl-plan.md"
       ],
       "started_at": null,
       "completed_at": "2026-10-16T18:48:47Z",
@@ -87,7 +87,7 @@
       "status": "COMPLETED",
       "agent": "review-agent",
       "artifacts": [
-        "code-review.md",
+        "docs/code-review.md",
         "backend/auth-service/auth_service/routes.py",
         ".env.example"
       ],
@@ -100,7 +100,7 @@
       "status": "COMPLETED",
       "agent": "verification-agent",
       "artifacts": [
-        "verification-report.md"
+        "docs/verification-report.md"
       ],
       "started_at": "2026-10-17T12:30:00Z",
       "completed_at": "2026-10-17T13:00:00Z",
@@ -111,13 +111,13 @@
       "status": "COMPLETED",
       "agent": "pr-agent",
       "artifacts": [
-        "pr-description.md",
-        "CHANGELOG.md"
+        "docs/pr-description.md",
+        "docs/CHANGELOG.md"
       ],
       "started_at": "2026-10-17T13:15:00Z",
       "completed_at": "2026-10-17T13:45:00Z",
       "retries": 0,
-      "notes": "PR Assembly complete. Created pr-description.md with all 5 required sections (Summary, Changes Made, Test Evidence, Known Limitations, Reviewer Checklist). Created CHANGELOG.md documenting v1.0.0 release. Branch feature/review-and-verification pushed to origin. Manual PR creation required due to Enterprise Managed User restrictions. Commit: 5052513. GitHub PR URL: https://github.com/rohittudu-epam/claude-capstone/compare/main...feature/review-and-verification"
+      "notes": "PR Assembly complete. Created docs/pr-description.md with all 5 required sections (Summary, Changes Made, Test Evidence, Known Limitations, Reviewer Checklist). Created docs/CHANGELOG.md documenting v1.0.0 release. Branch feature/review-and-verification pushed to origin. Manual PR creation required due to Enterprise Managed User restrictions. Commit: 5052513. GitHub PR URL: https://github.com/rohittudu-epam/claude-capstone/compare/main...feature/review-and-verification"
     }
   },
   "current_stage": "pr",

@@ -1,6 +1,6 @@
 # Implementation Notes
 
-Records what Phases 1-4 actually built, where it departs from `impl-plan.md` / `architecture.md` and why, how to run the tests, and what is not yet verified.
+Records what Phases 1-4 actually built, where it departs from `docs/impl-plan.md` / `docs/architecture.md` and why, how to run the tests, and what is not yet verified.
 
 ## Backend layout
 
@@ -123,12 +123,12 @@ Checked 2026-10-17 on Docker Desktop (Engine 29.8.1) with `docker compose build 
 ## Known gaps
 
 - Suggestions are only created in response to note events. Notes that existed before the worker started, or whose events were lost to stream trimming, get none until they are next edited; there is no backfill job.
-- Matching is exact-keyword with no stemming or synonyms, and candidate search is capped (15 keywords, 200 notes), so recall drops for very large accounts. Threshold tuning on representative notes is still needed (open question in `requirements.md`).
+- Matching is exact-keyword with no stemming or synonyms, and candidate search is capped (15 keywords, 200 notes), so recall drops for very large accounts. Threshold tuning on representative notes is still needed (open question in `docs/requirements.md`).
 - There is no endpoint to remove an accepted link.
 - Rejection rows stay until the pair changes, so they grow slowly with use.
 
 - Expired rows in `revoked_tokens` are never purged.
-- Password reset, account recovery, and account deletion are undefined (open question in `requirements.md`).
+- Password reset, account recovery, and account deletion are undefined (open question in `docs/requirements.md`).
 - The outbox publisher must run as a single instance to preserve ordering.
 - `GET /api/auth/verify?token=` puts a credential in a URL; keep it internal. Request logs record the path only, never the query string, so it is not logged by this application (a proxy in front may log it).
 - Traefik has no TLS certificate configuration, and mounts the Docker socket read-only (see [deployment.md](deployment.md)).

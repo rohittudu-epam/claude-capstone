@@ -2,7 +2,7 @@
 
 ## Metadata
 - **Files reviewed:** 56 backend Python files, 42 frontend TypeScript/TSX files, 3 scripts
-- **Reference documents:** requirements.md, architecture.md, impl-plan.md
+- **Reference documents:** docs/requirements.md, docs/architecture.md, docs/impl-plan.md
 - **Reviewer:** review-agent
 - **Version:** 1.0
 - **Date:** 2026-10-17
@@ -24,7 +24,7 @@
 
 **Details:**
 - **C-1 (High):** Line 113 has `except InvalidTokenError, IntegrityError:` which is Python 2 syntax. Python 3 requires `except (InvalidTokenError, IntegrityError):` with parentheses.
-- **C-2:** Verified that all 15 functional requirements from requirements.md are correctly implemented in the codebase. Authentication, note CRUD, tagging, search, link suggestions, graph API, and frontend components all match specifications.
+- **C-2:** Verified that all 15 functional requirements from docs/requirements.md are correctly implemented in the codebase. Authentication, note CRUD, tagging, search, link suggestions, graph API, and frontend components all match specifications.
 
 ### 2. Security
 
@@ -181,7 +181,7 @@ None. All critical concerns have been addressed or are acknowledged with mitigat
 - Structured logging with correlation IDs
 
 ### Architecture Adherence
-- All components from architecture.md are implemented
+- All components from docs/architecture.md are implemented
 - Outbox pattern correctly implemented for event durability
 - Token revocation mechanism in place
 - Cascading deletes via ON DELETE CASCADE

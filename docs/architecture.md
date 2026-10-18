@@ -482,7 +482,7 @@ LinkNote MVP is a containerized, microservices-based personal knowledge manageme
 
 ### Revision 1 (Design Review – 2026-10-16)
 
-**Changes incorporating Design Review findings (see `design-review.md` for full details):**
+**Changes incorporating Design Review findings (see `docs/design-review.md` for full details):**
 
 1. **DR-1: Event Publishing Durability** — Added Outbox Publisher component and `notes.outbox` table. Note Service now stores events durably in the outbox as part of the same transaction that persists the note. Outbox Publisher asynchronously publishes to Redis Streams, ensuring no events are lost if Redis is temporarily unavailable. Satisfies FR-8 acceptance criteria.
 

@@ -3,9 +3,9 @@
 ## Metadata
 - **Project:** LinkNote MVP
 - **Source code location:** backend/, frontend/, scripts/
-- **Requirements reference:** requirements.md (15 functional requirements, 9 non-functional requirements)
-- **Architecture reference:** architecture.md
-- **Code review reference:** code-review.md
+- **Requirements reference:** docs/requirements.md (15 functional requirements, 9 non-functional requirements)
+- **Architecture reference:** docs/architecture.md
+- **Code review reference:** docs/code-review.md
 - **Verifier:** verification-agent (Stage 7)
 - **Verification date:** 2026-10-17
 - **Version:** 1.0
@@ -358,7 +358,7 @@ Running 12 tests using 1 worker
 - Redis Streams support high-throughput event processing
 - Graph API caps results at 500 nodes with clear user feedback
 - Tested with 10,000 notes per user
-- Design assumptions documented in architecture.md
+- Design assumptions documented in docs/architecture.md
 
 **Verdict:** ✅ PASS - Design supports target scale
 
@@ -375,7 +375,7 @@ Running 12 tests using 1 worker
 **Tests Passed:** 
 - 12 auth security tests
 - 4 E2E security tests
-- Code review verified security implementations (code-review.md findings S-3, S-4, S-5)
+- Code review verified security implementations (docs/code-review.md findings S-3, S-4, S-5)
 
 **Verdict:** ✅ PASS
 
@@ -451,7 +451,7 @@ Running 12 tests using 1 worker
 - Comprehensive documentation suite:
   - `README.md` - Project overview and quick start
   - `CLAUDE.md` - Development workflow and agent system guide
-  - `architecture.md` - Complete system architecture
+  - `docs/architecture.md` - Complete system architecture
   - `docs/getting-started.md` - Setup and installation
   - `docs/deployment.md` - Deployment procedures
   - `docs/database.md` - Schema documentation
@@ -557,7 +557,7 @@ The test suite comprehensively covers edge cases as required:
 
 | Check | Result | Evidence |
 |-------|--------|----------|
-| All artifacts exist | ✅ PASS | requirements.md, architecture.md, design-review.md, impl-plan.md, code-review.md, all source files present |
+| All artifacts exist | ✅ PASS | docs/requirements.md, docs/architecture.md, docs/design-review.md, docs/impl-plan.md, docs/code-review.md, all source files present |
 | Required sections present | ✅ PASS | All documents have complete structure per templates |
 | No placeholder text | ✅ PASS | All documents contain real content, no TODOs or placeholders |
 | Format correct | ✅ PASS | Markdown formatting valid, code blocks properly formatted |
@@ -634,7 +634,7 @@ All 5 design review remediations (DR-1 through DR-5) have been implemented and v
 
 ## Code Review Fixes Verification
 
-All High severity issues from code-review.md have been fixed and verified:
+All High severity issues from docs/code-review.md have been fixed and verified:
 
 | Issue | Description | Fix | Verification |
 |-------|-------------|-----|--------------|
@@ -696,7 +696,7 @@ All 241 backend tests pass, confirming fixes are effective.
 - [x] All tests pass (341/342, 99.7% pass rate - 1 non-critical timing issue)
 - [x] Happy path covered for every functional requirement (15/15 verified)
 - [x] At least 3 edge cases tested per requirement (empty input, missing fields, errors - all verified)
-- [x] verification-report.md exists with complete test output (this document)
+- [x] docs/verification-report.md exists with complete test output (this document)
 - [x] Content quality check included (all checks pass)
 - [x] All files committed to git (git status clean on feature/review-and-verification branch)
 
@@ -730,7 +730,7 @@ Before production deployment:
 ## Files Committed
 
 All verification artifacts committed to feature/review-and-verification branch:
-- verification-report.md (this document)
+- docs/verification-report.md (this document)
 - All test files already in repository
 - Test execution logs captured
 

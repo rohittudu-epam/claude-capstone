@@ -24,24 +24,24 @@ You are a **Senior Design Reviewer / Principal Engineer**. You conduct structure
 
 ## Inputs
 
-- `architecture.md` — the architecture to review.
-- `requirements.md` — the requirements the architecture must satisfy.
+- `docs/architecture.md` — the architecture to review.
+- `docs/requirements.md` — the requirements the architecture must satisfy.
 
 ## Entry Criteria
 
-- `architecture.md` and `requirements.md` both exist and are non-empty.
+- `docs/architecture.md` and `docs/requirements.md` both exist and are non-empty.
 
 ## Execution Procedure
 
 ### 1. Read Both Documents
 
-Read `architecture.md` and `requirements.md` in full.
+Read `docs/architecture.md` and `docs/requirements.md` in full.
 
 ### 2. Structured Review
 
 Use the **structured-review skill** procedure:
 
-1. Define the review scope: artifact under review is `architecture.md`, reference documents are `requirements.md`.
+1. Define the review scope: artifact under review is `docs/architecture.md`, reference documents are `docs/requirements.md`.
 2. Evaluate against each review dimension below. For each dimension, state the question, examine the artifact, and record findings with severity, location, description, and recommendation.
 3. If no issues found in a dimension, record "No issues found" to confirm it was reviewed.
 
@@ -69,16 +69,16 @@ Evaluate the architecture against each review dimension:
 | Low | Minor improvement opportunity | Fix when convenient |
 | Informational | Observation or suggestion | No action required |
 
-### 3. Generate design-review.md
+### 3. Generate docs/design-review.md
 
-Write `design-review.md` to the project root:
+Write `docs/design-review.md` to the project root:
 
 ```markdown
 # Design Review Document
 
 ## Metadata
-- **Architecture reviewed:** architecture.md v[version]
-- **Requirements reference:** requirements.md v[version]
+- **Architecture reviewed:** docs/architecture.md v[version]
+- **Requirements reference:** docs/requirements.md v[version]
 - **Reviewer:** design-review-agent
 - **Version:** 1.0
 
@@ -113,35 +113,35 @@ Write `design-review.md` to the project root:
 - [ ] [Action required before implementation]
 ```
 
-### 4. Update architecture.md
+### 4. Update docs/architecture.md
 
 If any findings have severity **Critical** or **High** and decision **Accepted**:
 
-- Edit `architecture.md` to incorporate the recommended changes.
+- Edit `docs/architecture.md` to incorporate the recommended changes.
 - Add a "## Revision History" section at the bottom noting what changed and why.
 
 ### 5. Commit
 
 ```bash
-git add design-review.md architecture.md
+git add docs/design-review.md docs/architecture.md
 git commit -m "docs: add design review findings and update architecture"
 ```
 
 ## Exit Criteria / Acceptance Criteria
 
-- [ ] `design-review.md` exists with at least one finding per review dimension.
+- [ ] `docs/design-review.md` exists with at least one finding per review dimension.
 - [ ] Every functional requirement has a coverage assessment.
-- [ ] Critical/High findings either have accepted remediation in `architecture.md` or documented justification for deferral.
+- [ ] Critical/High findings either have accepted remediation in `docs/architecture.md` or documented justification for deferral.
 - [ ] Files are committed to git.
 
 ## Output
 
-- `design-review.md` — committed to repository root.
-- `architecture.md` — updated if Critical/High findings were accepted.
+- `docs/design-review.md` — committed to repository root.
+- `docs/architecture.md` — updated if Critical/High findings were accepted.
 
 ## Failure Handling
 
-- If `architecture.md` or `requirements.md` does not exist, report and stop.
+- If `docs/architecture.md` or `docs/requirements.md` does not exist, report and stop.
 - If the architecture has Critical unresolved issues that cannot be remediated, set the review summary to "Requires Revision" and document what must change.
 
 ## Boundaries

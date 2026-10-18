@@ -177,9 +177,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 For detailed changes and implementation notes, see:
-- `requirements.md` — Functional and non-functional requirements
-- `architecture.md` — System architecture and design decisions
-- `impl-plan.md` — Implementation task breakdown
-- `code-review.md` — Code review findings and fixes
-- `verification-report.md` — Test results and verification evidence
+- `docs/requirements.md` — Functional and non-functional requirements
+- `docs/architecture.md` — System architecture and design decisions
+- `docs/impl-plan.md` — Implementation task breakdown
+- `docs/code-review.md` — Code review findings and fixes
+- `docs/verification-report.md` — Test results and verification evidence
 - `docs/implementation-notes.md` — Deviations, verification results, known limitations

@@ -89,7 +89,7 @@ export function NoteEditor({ note }: { note?: Note }) {
 
   function validate(): Errors {
     const next: Errors = {};
-    if (!title.trim()) next.title = "Give your note a title";
+    if (!title.trim()) next.title = "Give the note a title.";
     else if (title.trim().length > MAX_TITLE_LENGTH) next.title = `The title can be at most ${MAX_TITLE_LENGTH} characters`;
     if (new TextEncoder().encode(body).length > MAX_BODY_BYTES) {
       next.body = `The note is too long (limit ${MAX_BODY_BYTES / 1024} KiB)`;
@@ -226,17 +226,16 @@ export function NoteEditor({ note }: { note?: Note }) {
             <Label id="body-label" className="mb-0 section-label">Markdown editor</Label>
             <p className="mt-1 text-xs text-text-muted">Write with Markdown and preview before saving.</p>
           </div>
-          <div role="tablist" aria-label="Editor mode" className="flex overflow-hidden rounded-lg border border-border-strong">
+          <div role="group" aria-label="Editor mode" className="flex overflow-hidden rounded-lg border border-border-strong">
             {(["write", "preview"] as const).map((value) => (
               <button
                 key={value}
                 type="button"
-                role="tab"
-                aria-selected={mode === value}
+                aria-pressed={mode === value}
                 aria-controls={`${value}-panel`}
+                aria-label={value}
                 onClick={() => setMode(value)}
                 onKeyDown={(e) => onTabKeyDown(e, value)}
-                tabIndex={mode === value ? 0 : -1}
                 className={cn(
                   "px-4 py-1.5 text-sm font-medium capitalize transition-all duration-150",
                   mode === value
@@ -257,9 +256,9 @@ export function NoteEditor({ note }: { note?: Note }) {
               value={body}
               onChange={(e) => edited(setBody)(e.target.value)}
               placeholder="Write in Markdown..."
-              aria-label="Note content, Markdown"
               aria-invalid={Boolean(errors.body)}
               aria-describedby={errors.body ? "body-error" : "word-count"}
+              aria-label="Markdown text"
               className="min-h-[min(60vh,600px)] resize-y rounded-lg border-border-strong bg-bg-elevated p-4 text-[15px] leading-7"
             />
             <div className="mt-1.5 flex items-center justify-between text-xs text-text-muted">
@@ -275,6 +274,7 @@ export function NoteEditor({ note }: { note?: Note }) {
           <div
             id="preview-panel"
             role="tabpanel"
+            aria-label="Preview"
             aria-labelledby="body-label"
             className="min-h-[min(60vh,600px)] overflow-y-auto border-t border-border-subtle bg-bg-elevated p-4 sm:p-6"
           >
@@ -299,7 +299,7 @@ export function NoteEditor({ note }: { note?: Note }) {
           <Button variant="ghost" disabled={saving} onClick={cancel} className="flex-1 sm:flex-initial">
             Cancel
           </Button>
-          {saved && <span role="status" className="hidden text-sm text-success sm:inline">Saved</span>}
+          {saved && <span role="status" className="text-sm text-success">Saved.</span>}
           {note && !confirmingDelete && (
             <Button variant="secondary" className="ml-auto border-danger/40 text-danger hover:bg-danger/10" onClick={() => setConfirmingDelete(true)}>
               Delete

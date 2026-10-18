@@ -52,7 +52,7 @@
 - **Result:** ✅ Not applicable per source document — correctly implemented as sequential-only.
 
 ### Scenario 6: Conflicting artifacts
-- **Assessment:** Only the Design Review Agent modifies another agent's artifact (`architecture.md`). This is controlled and documented. No other cross-agent writes exist.
+- **Assessment:** Only the Design Review Agent modifies another agent's artifact (`docs/architecture.md`). This is controlled and documented. No other cross-agent writes exist.
 - **Result:** ✅ No conflict risk in the designed pipeline.
 
 ### Scenario 7: Upstream change after downstream work
@@ -67,7 +67,7 @@
 
 1. **Single-session model:** The orchestrator operates within a single Claude Code session using role-switching. Long pipelines may approach context window limits. Mitigation: `workflow-state.json` enables resumption.
 
-2. **No automatic mid-pipeline change detection:** If a user manually modifies an upstream artifact (e.g., `requirements.md`) after that stage completed, downstream stages will not automatically re-execute. The user must manually trigger re-execution.
+2. **No automatic mid-pipeline change detection:** If a user manually modifies an upstream artifact (e.g., `docs/requirements.md`) after that stage completed, downstream stages will not automatically re-execute. The user must manually trigger re-execution.
 
 3. **Subagent invocation:** Claude Code's subagent invocation is implemented as role-switching within the orchestrator's session, not as isolated parallel processes. This means agent boundaries are enforced by instructions, not by process isolation.
 

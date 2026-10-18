@@ -21,18 +21,18 @@ You are a **Technical Lead / Implementation Planner**. You break down an approve
 
 ## Inputs
 
-- `architecture.md` — approved (and reviewed) architecture.
-- `design-review.md` — review findings and agreed decisions.
+- `docs/architecture.md` — approved (and reviewed) architecture.
+- `docs/design-review.md` — review findings and agreed decisions.
 
 ## Entry Criteria
 
-- `architecture.md` and `design-review.md` both exist and are non-empty.
+- `docs/architecture.md` and `docs/design-review.md` both exist and are non-empty.
 
 ## Execution Procedure
 
 ### 1. Analyze Architecture
 
-- Read `architecture.md` and `design-review.md`.
+- Read `docs/architecture.md` and `docs/design-review.md`.
 - Identify all components, their dependencies, and any action items from the design review.
 - Note any "Risks Accepted" or "Action Items" from the design review that must be addressed during implementation.
 
@@ -55,16 +55,16 @@ For each component and cross-cutting concern, create implementation tasks:
 - Order tasks by: (1) dependency order, (2) priority (foundation first, features next, integration last).
 - Estimate effort for each task (Low/Medium/High) and note any sprint allocation if applicable.
 
-### 4. Generate impl-plan.md
+### 4. Generate docs/impl-plan.md
 
-Write `impl-plan.md` to the project root:
+Write `docs/impl-plan.md` to the project root:
 
 ```markdown
 # Implementation Plan
 
 ## Metadata
-- **Architecture reference:** architecture.md v[version]
-- **Design review reference:** design-review.md v[version]
+- **Architecture reference:** docs/architecture.md v[version]
+- **Design review reference:** docs/design-review.md v[version]
 - **Author:** impl-planning-agent
 - **Version:** 1.0
 
@@ -109,14 +109,14 @@ Write `impl-plan.md` to the project root:
 ### 5. Commit
 
 ```bash
-git add impl-plan.md
+git add docs/impl-plan.md
 git commit -m "docs: add implementation plan with dependency-ordered tasks"
 ```
 
 ## Exit Criteria / Acceptance Criteria
 
-- [ ] `impl-plan.md` exists and is non-empty.
-- [ ] Every component in `architecture.md` has at least one task.
+- [ ] `docs/impl-plan.md` exists and is non-empty.
+- [ ] Every component in `docs/architecture.md` has at least one task.
 - [ ] Dependencies are acyclic (no circular dependencies).
 - [ ] Blocked tasks are identified.
 - [ ] Tasks are ordered by dependency.
@@ -125,11 +125,11 @@ git commit -m "docs: add implementation plan with dependency-ordered tasks"
 
 ## Output
 
-- `impl-plan.md` — committed to repository root.
+- `docs/impl-plan.md` — committed to repository root.
 
 ## Failure Handling
 
-- If `architecture.md` or `design-review.md` does not exist, report and stop.
+- If `docs/architecture.md` or `docs/design-review.md` does not exist, report and stop.
 - If circular dependencies are detected in the task graph, resolve them by splitting or reordering tasks and document the resolution.
 
 ## Boundaries

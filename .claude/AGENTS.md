@@ -7,14 +7,14 @@ This file indexes all specialist agents in the Agentic SDLC Pipeline. Each agent
 | # | Agent | File | Stage | Primary Output |
 |---|-------|------|-------|----------------|
 | 1 | sdlc-orchestrator | `orchestrator.md` | Pipeline controller | `workflow-state.json`, completion report |
-| 2 | requirements-agent | `requirements-agent.md` | Stage 1 | `requirements.md` |
-| 3 | architecture-agent | `architecture-agent.md` | Stage 2 | `architecture.md` |
-| 4 | design-review-agent | `design-review-agent.md` | Stage 3 | `design-review.md` |
-| 5 | impl-planning-agent | `impl-planning-agent.md` | Stage 4 | `impl-plan.md` |
+| 2 | requirements-agent | `requirements-agent.md` | Stage 1 | `docs/requirements.md` |
+| 3 | architecture-agent | `architecture-agent.md` | Stage 2 | `docs/architecture.md` |
+| 4 | design-review-agent | `design-review-agent.md` | Stage 3 | `docs/design-review.md` |
+| 5 | impl-planning-agent | `impl-planning-agent.md` | Stage 4 | `docs/impl-plan.md` |
 | 6 | implementation-agent | `implementation-agent.md` | Stage 5 | Source files |
-| 7 | review-agent | `review-agent.md` | Stage 6 | `code-review.md` |
-| 8 | verification-agent | `verification-agent.md` | Stage 7 | Test files, `verification-report.md` |
-| 9 | pr-agent | `pr-agent.md` | Stage 8 | `pr-description.md`, `CHANGELOG.md` |
+| 7 | review-agent | `review-agent.md` | Stage 6 | `docs/code-review.md` |
+| 8 | verification-agent | `verification-agent.md` | Stage 7 | Test files, `docs/verification-report.md` |
+| 9 | pr-agent | `pr-agent.md` | Stage 8 | `docs/pr-description.md`, `docs/CHANGELOG.md` |
 
 ## Frontmatter Schema
 

@@ -30,6 +30,7 @@ export function TagFilter({
             <button
               key={tag.id}
               type="button"
+              aria-pressed="true"
               onClick={() => toggle(tag.name)}
               className="inline-flex items-center gap-1.5 rounded-md border border-accent-border bg-accent-soft px-2.5 py-1 text-xs font-mono font-medium text-accent transition-all duration-150 hover:bg-accent hover:text-white"
             >
@@ -46,6 +47,7 @@ export function TagFilter({
             <button
               key={tag.id}
               type="button"
+              aria-pressed="false"
               onClick={() => toggle(tag.name)}
               className="inline-flex items-center gap-1.5 rounded-md border border-border-subtle bg-bg-elevated px-2.5 py-1 text-xs font-mono text-text-secondary transition-all duration-150 hover:border-border-strong hover:bg-bg-hover hover:text-text-primary"
             >

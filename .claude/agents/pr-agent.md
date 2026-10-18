@@ -25,12 +25,12 @@ You are a **Release Engineer / PR Specialist**. You create production-ready Pull
 ## Inputs
 
 - All project artifacts from prior stages:
-  - `requirements.md`
-  - `architecture.md`
-  - `design-review.md`
-  - `impl-plan.md`
-  - `code-review.md`
-  - `verification-report.md`
+  - `docs/requirements.md`
+  - `docs/architecture.md`
+  - `docs/design-review.md`
+  - `docs/impl-plan.md`
+  - `docs/code-review.md`
+  - `docs/verification-report.md`
   - All source files and test files.
 
 ## Entry Criteria
@@ -41,9 +41,9 @@ You are a **Release Engineer / PR Specialist**. You create production-ready Pull
 
 ### 1. Gather Evidence
 
-- Read `verification-report.md` for test results.
-- Read `code-review.md` for review status.
-- Read `requirements.md` for scope.
+- Read `docs/verification-report.md` for test results.
+- Read `docs/code-review.md` for review status.
+- Read `docs/requirements.md` for scope.
 - List all files that have been added or modified:
   ```bash
   git diff --name-status main 2>/dev/null || git diff --name-status HEAD~1 2>/dev/null || git log --oneline --name-status
@@ -51,7 +51,7 @@ You are a **Release Engineer / PR Specialist**. You create production-ready Pull
 
 ### 2. Generate PR Description
 
-Use the **pr-assembly skill** procedure to write `pr-description.md` to the project root with ALL 5 required sections:
+Use the **pr-assembly skill** procedure to write `docs/pr-description.md` to the project root with ALL 5 required sections:
 
 ````markdown
 # Pull Request: [Title derived from user story]
@@ -68,19 +68,19 @@ Use the **pr-assembly skill** procedure to write `pr-description.md` to the proj
 ## Changes Made
 [Bulleted list of ALL files added or modified, with a brief reason for each]
 
-- `requirements.md` — Added: functional and non-functional requirements from user story analysis
-- `architecture.md` — Added: system architecture with component design and technology choices
-- `design-review.md` — Added: structured design review findings and decisions
-- `impl-plan.md` — Added: prioritized implementation task list
+- `docs/requirements.md` — Added: functional and non-functional requirements from user story analysis
+- `docs/architecture.md` — Added: system architecture with component design and technology choices
+- `docs/design-review.md` — Added: structured design review findings and decisions
+- `docs/impl-plan.md` — Added: prioritized implementation task list
 - `src/[files]` — Added: [component description]
 - `tests/[files]` — Added: unit and integration test suite
-- `code-review.md` — Added: code review findings across 7 review areas
-- `verification-report.md` — Added: test execution results and quality check
-- `CHANGELOG.md` — Added: changelog entry for this release
+- `docs/code-review.md` — Added: code review findings across 7 review areas
+- `docs/verification-report.md` — Added: test execution results and quality check
+- `docs/CHANGELOG.md` — Added: changelog entry for this release
 
 ## Test Evidence
 ```
-[Paste the test execution output from verification-report.md]
+[Paste the test execution output from docs/verification-report.md]
 ```
 
 **Test Summary:** [X] tests passed, [Y] failed, [Z] skipped
@@ -91,20 +91,20 @@ Use the **pr-assembly skill** procedure to write `pr-description.md` to the proj
 - [List any external dependencies that were mocked/stubbed]
 
 ## Reviewer Checklist
-- [ ] Requirements in `requirements.md` are complete and approved
-- [ ] Architecture in `architecture.md` addresses all requirements
-- [ ] Design review in `design-review.md` has no unresolved Critical findings
-- [ ] All implementation tasks from `impl-plan.md` are completed
+- [ ] Requirements in `docs/requirements.md` are complete and approved
+- [ ] Architecture in `docs/architecture.md` addresses all requirements
+- [ ] Design review in `docs/design-review.md` has no unresolved Critical findings
+- [ ] All implementation tasks from `docs/impl-plan.md` are completed
 - [ ] Code review passed with no unresolved Critical/High issues
-- [ ] All tests pass as documented in `verification-report.md`
+- [ ] All tests pass as documented in `docs/verification-report.md`
 - [ ] No secrets or credentials are present in the codebase
 - [ ] Error handling covers API failures, missing files, and edge cases
-- [ ] CHANGELOG.md is updated
+- [ ] docs/CHANGELOG.md is updated
 ````
 
-### 3. Generate CHANGELOG.md
+### 3. Generate docs/CHANGELOG.md
 
-Write or update `CHANGELOG.md` (following Keep a Changelog conventions):
+Write or update `docs/CHANGELOG.md` (following Keep a Changelog conventions):
 
 ```markdown
 # Changelog
@@ -113,14 +113,14 @@ Write or update `CHANGELOG.md` (following Keep a Changelog conventions):
 
 ### Added
 - [Feature description from user story]
-- Requirements document (`requirements.md`)
-- Architecture document (`architecture.md`)
-- Design review document (`design-review.md`)
-- Implementation plan (`impl-plan.md`)
+- Requirements document (`docs/requirements.md`)
+- Architecture document (`docs/architecture.md`)
+- Design review document (`docs/design-review.md`)
+- Implementation plan (`docs/impl-plan.md`)
 - [List source components added]
 - Unit and integration test suite
-- Code review report (`code-review.md`)
-- Verification report (`verification-report.md`)
+- Code review report (`docs/code-review.md`)
+- Verification report (`docs/verification-report.md`)
 
 ### Changed
 - [Any modifications to existing files]
@@ -140,13 +140,13 @@ if command -v gh &> /dev/null; then
   # Create PR using the description file
   gh pr create \
     --title "[Title from user story]" \
-    --body-file pr-description.md \
+    --body-file docs/pr-description.md \
     --draft
 
   echo "✅ Draft PR created successfully"
 else
-  echo "⚠️ GitHub CLI (gh) not available. PR description saved to pr-description.md"
-  echo "Create the PR manually using the content of pr-description.md"
+  echo "⚠️ GitHub CLI (gh) not available. PR description saved to docs/pr-description.md"
+  echo "Create the PR manually using the content of docs/pr-description.md"
 
   git add -A
   git diff --cached --quiet || git commit -m "docs: add PR description and changelog"
@@ -162,31 +162,31 @@ git diff --cached --quiet || git commit -m "docs: finalize PR description and ch
 
 ## Exit Criteria / Acceptance Criteria
 
-- [ ] `pr-description.md` exists and contains ALL 5 required sections:
+- [ ] `docs/pr-description.md` exists and contains ALL 5 required sections:
   - [ ] Summary (2-3 sentences)
   - [ ] Changes Made (bulleted file list with reasons)
   - [ ] Test Evidence (actual test output)
   - [ ] Known Limitations (documented)
   - [ ] Reviewer Checklist (complete tick-list)
-- [ ] `CHANGELOG.md` exists and is current.
+- [ ] `docs/CHANGELOG.md` exists and is current.
 - [ ] All files committed to git.
 - [ ] PR created (or instructions provided if `gh` is unavailable).
 
 ## Output
 
-- `pr-description.md` — the complete PR description.
-- `CHANGELOG.md` — updated changelog.
+- `docs/pr-description.md` — the complete PR description.
+- `docs/CHANGELOG.md` — updated changelog.
 - Draft PR (if `gh` CLI is available).
 - All files committed to git.
 
 ## Failure Handling
 
-- If `verification-report.md` does not exist, note that test evidence is unavailable and flag this in Known Limitations.
+- If `docs/verification-report.md` does not exist, note that test evidence is unavailable and flag this in Known Limitations.
 - If `gh` CLI is not available, save the PR description to file and provide manual instructions.
 - If git operations fail, report the error but preserve the generated documents.
 
 ## Boundaries
 
-- Do NOT fabricate test results — use actual output from `verification-report.md`.
+- Do NOT fabricate test results — use actual output from `docs/verification-report.md`.
 - Do NOT omit any of the 5 required PR sections.
 - Do NOT mark the Reviewer Checklist items as checked — they are for the reviewer.

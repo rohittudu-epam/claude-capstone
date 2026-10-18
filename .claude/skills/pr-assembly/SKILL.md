@@ -30,7 +30,7 @@ Every PR description MUST contain these 5 sections. No section may be omitted.
 ### Section 3: Test Evidence
 - Paste the actual test output from the verification stage.
 - Include pass/fail counts.
-- Do NOT fabricate results — use real output from `verification-report.md`.
+- Do NOT fabricate results — use real output from `docs/verification-report.md`.
 - If tests were not run, state this explicitly.
 
 ### Section 4: Known Limitations
@@ -54,7 +54,7 @@ Every PR description MUST contain these 5 sections. No section may be omitted.
 
 1. Read all pipeline artifacts.
 2. Extract relevant content for each section.
-3. Write `pr-description.md` with all 5 sections.
-4. Write or update `CHANGELOG.md` following Keep a Changelog conventions.
+3. Write `docs/pr-description.md` with all 5 sections.
+4. Write or update `docs/CHANGELOG.md` following Keep a Changelog conventions.
 5. Validate that no section is empty or missing (use the artifact-validation skill).
 6. Commit all changes and create the PR (via `gh` CLI if available, otherwise provide manual instructions).

@@ -27,51 +27,51 @@ Use this skill when the orchestrator needs to validate that a stage's output art
 
 ### Expected Content by Artifact Type
 
-#### requirements.md
+#### docs/requirements.md
 - [ ] Contains "Functional Requirements" section with at least one FR-N entry
 - [ ] Contains "Non-Functional Requirements" section with at least one NFR-N entry
 - [ ] Contains "Acceptance Criteria" for each requirement
 - [ ] Contains "Assumptions" section
 - [ ] Contains "Out of Scope" section
 
-#### architecture.md
+#### docs/architecture.md
 - [ ] Contains "Components" section with at least 2 components
 - [ ] Contains "Technology Choices" section
 - [ ] Contains "Data Flow" section
 - [ ] Contains requirements traceability mapping (FR-N → Component)
 
-#### design-review.md
+#### docs/design-review.md
 - [ ] Contains "Review Summary" with an assessment verdict
 - [ ] Contains "Review Findings" with at least one finding
 - [ ] Contains "Requirements Coverage Assessment"
 - [ ] Every functional requirement has a coverage assessment
 
-#### impl-plan.md
+#### docs/impl-plan.md
 - [ ] Contains "Task List" with at least one IMPL-N task
 - [ ] Contains "Execution Order"
 - [ ] Each task has "Dependencies" and "Acceptance Criteria"
 - [ ] Dependencies are acyclic (no circular dependencies)
 
-#### code-review.md
+#### docs/code-review.md
 - [ ] Contains findings for all 7 review areas
 - [ ] Contains "Review Summary" with overall assessment
 - [ ] No unresolved Critical findings
 - [ ] No unresolved High findings (or documented justification)
 
-#### verification-report.md
+#### docs/verification-report.md
 - [ ] Contains "Test Summary" with counts
 - [ ] Contains "Test Execution Output"
 - [ ] Contains verdict (PASS/FAIL)
 - [ ] Contains "Content Quality Check"
 
-#### pr-description.md
+#### docs/pr-description.md
 - [ ] Contains "Summary" section
 - [ ] Contains "Changes Made" section
 - [ ] Contains "Test Evidence" section
 - [ ] Contains "Known Limitations" section
 - [ ] Contains "Reviewer Checklist" section
 
-#### CHANGELOG.md
+#### docs/CHANGELOG.md
 - [ ] Contains "Added" section
 - [ ] Contains "Changed" section
 - [ ] Contains "Fixed" section
